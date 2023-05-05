@@ -4,8 +4,8 @@ import { capitalize } from "utils";
  * CustomInstanceHookName represents the name of a custom instance hook.
  * The resulting string has the format `use{N}Instance{T}`.
  *
- * @template N - A string representing the capitalized instance name.
- * @template T - A string representing the capitalized hook type.
+ * @template N - A string representing the instance name.
+ * @template T - A string representing the hook type.
  *
  * @example
  * // Given the instance name "user" and the hook type "selector":

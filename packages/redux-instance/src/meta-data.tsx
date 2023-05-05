@@ -42,5 +42,3 @@ export function useReduxInstanceMetadataContext() {
     "Redux Instance Metadata Context"
   );
 }
-
-// use{{customName}}MetaDataContext
