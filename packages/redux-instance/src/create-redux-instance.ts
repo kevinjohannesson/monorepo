@@ -40,7 +40,7 @@ const INIT_INSTANCE_ACTION_TYPE = "@@custom-init";
  * @template {N} name - The name of the slice.
  * @template {Reducer<S, AnyAction>} instanceReducer - The reducer function for instances of the type S.
  * @template {string} actionMatcherPrefix - The prefix for matching actions specific to this slice.
- * @template {Record<string, S>} instances - Optional: Add instances during creation.
+ * @template {Instances<S>} instances - Optional: Add instances during creation.
  *
  * @returns An object containing the created slice, actions, selectors, and hooks.
  */
@@ -48,7 +48,7 @@ export function createReduxInstance<N extends string, S>(
   name: N,
   instanceReducer: Reducer<S, AnyAction>,
   actionMatcherPrefix: string,
-  instances?: Record<string, S>
+  instances?: Instances<S>
 ) {
   const slice = createSlice({
     name,
@@ -156,6 +156,8 @@ export const testSlice = createSlice({
 });
 
 const selectZoomLevel = (state: TestInstanceState) => state.testSlice.zoomLevel;
+const selectTestById = (pos: 0 | 1) => (state: TestInstanceState) =>
+  state.testSlice.centerCoordinates[pos];
 
 interface TestInstanceState {
   [testSlice.name]: TestSliceState;
@@ -173,5 +175,7 @@ const {
 } = createReduxInstance("mappr", testInstanceReducer, "mapprInstance");
 
 const useFoo = () => {
-  const foo = useMapprInstanceSelector("default", selectZoomLevel);
+  const foo1 = useMapprInstanceSelector("default")(selectZoomLevel);
+  const foo2 = useMapprInstanceSelector("default")(selectTestById(1));
+  // const foo2 = useMapprInstanceSelector("default")(selectMapprInstanceIsAvailable("foo"));
 };

@@ -30,27 +30,33 @@ export function createStoreIntanceHooks<N extends string, S>(
      *
      * @template R - The return type of the selector function.
      */
-    useSliceInstanceSelector<R>(id: string, selector: (state: S) => R): R {
-      const value = useGlobalSelector((state) =>
-        selector(selectInstance(prefixIdWithName(name, id))(state))
-      );
+    useSliceInstanceSelector(id: string) {
+      return function useInstanceSelectorWithId<R>(
+        selector: (state: S) => R
+      ): R {
+        const value = useGlobalSelector((state) =>
+          selector(selectInstance(prefixIdWithName(name, id))(state))
+        );
 
-      return value;
+        return value;
+      };
     },
     /**
      * A hook for dispatching actions with added metadata from the context.
      */
     useSliceInstanceDispatch(id: string) {
-      const dispatch = useGlobalDispatch();
+      return function useSliceInstanceDispatchWithId() {
+        const dispatch = useGlobalDispatch();
 
-      return <T extends Action>(action: T): T => {
-        if (typeof action === "function") {
-          throw new Error(
-            `useSliceInstanceDispatch should only be used for object actions.`
-          );
-        }
+        return <T extends Action>(action: T): T => {
+          if (typeof action === "function") {
+            throw new Error(
+              `useSliceInstanceDispatch should only be used for object actions.`
+            );
+          }
 
-        return dispatch({ ...action, meta: { id } });
+          return dispatch({ ...action, meta: { id } });
+        };
       };
     },
   };

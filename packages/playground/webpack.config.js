@@ -9,7 +9,7 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
-      "gis-viewer": path.resolve(__dirname, "../gis-viewer/src"),
+      "gis-viewer": path.resolve(__dirname, "../gis-viewer"),
     },
   },
   module: {
