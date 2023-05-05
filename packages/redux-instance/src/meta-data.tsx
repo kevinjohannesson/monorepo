@@ -1,7 +1,7 @@
 import { ReactNode, createContext } from "react";
 import { useRequiredContext } from "utils";
 
-export interface MetaDataContextValue {
+interface ReduxInstanceMetadataContextValue {
   /**
    * A unique identifier for a particular instance. If multiple components
    * share the same ID, they will share the same state. To create separate
@@ -10,20 +10,23 @@ export interface MetaDataContextValue {
   id: string;
 }
 
-const MetaDataContext = createContext({} as MetaDataContextValue);
+const ReduxInstanceMetadataContext = createContext(
+  {} as ReduxInstanceMetadataContextValue
+);
 
-export interface MetaDataProviderProps extends Required<MetaDataContextValue> {
+interface ReduxInstanceMetadataProviderProps
+  extends Required<ReduxInstanceMetadataContextValue> {
   children?: ReactNode;
 }
 
-export function MetaDataProvider({
+export function ReduxInstanceMetadataProvider({
   id = "default",
   children = null,
-}: MetaDataProviderProps) {
+}: ReduxInstanceMetadataProviderProps) {
   return (
-    <MetaDataContext.Provider value={{ id }}>
+    <ReduxInstanceMetadataContext.Provider value={{ id }}>
       {children}
-    </MetaDataContext.Provider>
+    </ReduxInstanceMetadataContext.Provider>
   );
 }
 
@@ -33,6 +36,11 @@ export function MetaDataProvider({
  * @returns The context value containing the metadata ID.
  * @throws {Error} If the context value is not provided.
  */
-export function useMetaDataContext() {
-  return useRequiredContext(MetaDataContext, "MetaData Context");
+export function useReduxInstanceMetadataContext() {
+  return useRequiredContext(
+    ReduxInstanceMetadataContext,
+    "Redux Instance Metadata Context"
+  );
 }
+
+// use{{customName}}MetaDataContext

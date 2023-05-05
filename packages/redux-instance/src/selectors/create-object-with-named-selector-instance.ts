@@ -4,7 +4,8 @@ import {
 } from "./create-custom-instance-selector-name";
 
 /**
- * Creates an object containing a named selector instance as a member.
+ * Creates an object containing a named selector instance as a member. This is mainly used for correct
+ * type inference.
  *
  * @template {N} name - The name of the instance, which is used as a prefix for the generated selector name.
  * @template {T} type - The type of the selector instance, which is used as a suffix for the generated selector name.

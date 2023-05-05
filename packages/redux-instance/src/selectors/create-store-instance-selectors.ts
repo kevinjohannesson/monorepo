@@ -21,7 +21,7 @@ import { prefixIdWithName } from "../utils";
  * const { selectInstance, selectIsInstanceAvailable } = mySelectors(myName);
  */
 export function createStoreInstanceSelectors<S>() {
-  return function _createSelectors<N extends string>(name: N) {
+  return function createSelectors<N extends string>(name: N) {
     return {
       /** A selector to get an instance with the given ID from the state slice. */
       selectInstance(id: string) {

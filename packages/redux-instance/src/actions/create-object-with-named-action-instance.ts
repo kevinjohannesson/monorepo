@@ -4,7 +4,8 @@ import {
 } from "./create-custom-instance-action-name";
 
 /**
- * Creates an object containing a named action instance as a member.
+ * Creates an object containing a named action instance as a member. This is mainly used for correct
+ * type inference.
  *
  * @template {N} name - The name of the instance, used as a prefix for the generated action name.
  * @template {T} type - The type of the action instance, used as a suffix for the generated action name.

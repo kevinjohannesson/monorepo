@@ -4,7 +4,8 @@ import {
 } from "./create-custom-instance-hook-name";
 
 /**
- * Creates an object containing a named hook instance as a member.
+ * Creates an object containing a named hook instance as a member. This is mainly used for correct
+ * type inference.
  *
  * @template {N} name - The name of the instance, used as a prefix for the generated hook name.
  * @template {T} type - The type of the hook instance, used as a suffix for the generated hook name.
