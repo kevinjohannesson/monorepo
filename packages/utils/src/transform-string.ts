@@ -9,8 +9,7 @@
  */
 export function capitalize<T extends string>(str: T): Capitalize<T> {
   if (!str.length) return str as Capitalize<T>;
-  const [firstLetter, rest] = str;
-  return `${firstLetter.toUpperCase()}${rest || ""}` as Capitalize<T>;
+  return (str.charAt(0).toUpperCase() + str.slice(1)) as Capitalize<T>;
 }
 
 /**
@@ -24,6 +23,5 @@ export function capitalize<T extends string>(str: T): Capitalize<T> {
  */
 export function uncapitalize<T extends string>(str: T): Capitalize<T> {
   if (!str.length) return str as Capitalize<T>;
-  const [firstLetter, rest] = str;
-  return `${firstLetter.toLowerCase()}${rest || ""}` as Capitalize<T>;
+  return (str.charAt(0).toLowerCase() + str.slice(1)) as Capitalize<T>;
 }
