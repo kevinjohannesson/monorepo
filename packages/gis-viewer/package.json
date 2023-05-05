@@ -2,22 +2,8 @@
   "name": "gis-viewer",
   "version": "1.0.0",
   "private": "true",
-  "description": "> TODO: description",
-  "author": "kevinjohannesson <kroon.kevin@gmail.com>",
-  "homepage": "https://github.com/kevinjohannesson/monorepo#readme",
   "license": "ISC",
-  "main": "src/gis-viewer.ts",
-  "directories": {
-    "src": "src",
-    "test": "__tests__"
-  },
-  "files": [
-    "src"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kevinjohannesson/monorepo.git"
-  },
+  "main": "index.ts",
   "scripts": {
     "test": "node ./__tests__/gis-viewer.test.js"
   },
@@ -25,11 +11,15 @@
     "url": "https://github.com/kevinjohannesson/monorepo/issues"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.8",
+    "@emotion/styled": "^11.10.8",
     "@reduxjs/toolkit": "^1.9.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "utils": "*",
+    "redux-instance": "*"
   }
 }
