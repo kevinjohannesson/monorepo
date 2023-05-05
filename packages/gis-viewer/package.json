@@ -1,6 +1,7 @@
 {
   "name": "gis-viewer",
   "version": "1.0.0",
+  "private": "true",
   "description": "> TODO: description",
   "author": "kevinjohannesson <kroon.kevin@gmail.com>",
   "homepage": "https://github.com/kevinjohannesson/monorepo#readme",

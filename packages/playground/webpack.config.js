@@ -8,15 +8,16 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
+    alias: {
+      "gis-viewer": path.resolve(__dirname, "../gis-viewer/src"),
+    },
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
+        use: "ts-loader",
       },
     ],
   },

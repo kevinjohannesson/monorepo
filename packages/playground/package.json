@@ -2,6 +2,7 @@
   "name": "playground",
   "version": "1.0.0",
   "license": "MIT",
+  "private": "true",
   "scripts": {
     "start": "webpack serve --mode development --config webpack.config.js"
   },
@@ -23,6 +24,7 @@
     "webpack-dev-server": "^4.13.3"
   },
   "devDependencies": {
-    "@types/react-dom": "18.2.4"
+    "@types/react-dom": "^18.2.4",
+    "ts-loader": "^9.4.2"
   }
 }
