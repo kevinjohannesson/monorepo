@@ -1,23 +1,11 @@
 import { Action } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
-import { useReduxInstanceMetadataContext } from "../meta-data";
 import {
   GlobalDispatchProxy,
   GlobalSelectorProxy,
   GlobalStoreStateProxy,
 } from "../types";
 import { prefixIdWithName } from "../utils";
-
-/**
- * A hook that returns a function to add metadata from the context to an action.
- */
-function useAddMetaDataFromContextToAction() {
-  const { id } = useReduxInstanceMetadataContext();
-
-  return function <T extends Action>(action: T) {
-    return { ...action, meta: { id } };
-  };
-}
 
 /**
  * Creates instance hooks for a given store instance name and instance selector function.
@@ -42,8 +30,7 @@ export function createStoreIntanceHooks<N extends string, S>(
      *
      * @template R - The return type of the selector function.
      */
-    useSliceInstanceSelector<R>(selector: (state: S) => R): R {
-      const { id } = useReduxInstanceMetadataContext();
+    useSliceInstanceSelector<R>(id: string, selector: (state: S) => R): R {
       const value = useGlobalSelector((state) =>
         selector(selectInstance(prefixIdWithName(name, id))(state))
       );
@@ -53,9 +40,8 @@ export function createStoreIntanceHooks<N extends string, S>(
     /**
      * A hook for dispatching actions with added metadata from the context.
      */
-    useSliceInstanceDispatch() {
+    useSliceInstanceDispatch(id: string) {
       const dispatch = useGlobalDispatch();
-      const addMetaData = useAddMetaDataFromContextToAction();
 
       return <T extends Action>(action: T): T => {
         if (typeof action === "function") {
@@ -64,7 +50,7 @@ export function createStoreIntanceHooks<N extends string, S>(
           );
         }
 
-        return dispatch(addMetaData(action));
+        return dispatch({ ...action, meta: { id } });
       };
     },
   };

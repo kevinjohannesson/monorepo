@@ -173,5 +173,5 @@ const {
 } = createReduxInstance("mappr", testInstanceReducer, "mapprInstance");
 
 const useFoo = () => {
-  const foo = useMapprInstanceSelector(selectZoomLevel);
+  const foo = useMapprInstanceSelector("default", selectZoomLevel);
 };
