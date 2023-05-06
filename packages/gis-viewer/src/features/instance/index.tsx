@@ -1,66 +1,49 @@
 import { ReactNode, useEffect } from "react";
 import {
+  addGisViewer,
+  removeGisViewer,
   selectGisViewerInstanceIsAvailable,
-  useGisViewerInstanceSelector,
-  useGisViewerSelector,
 } from "../../slice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useMetadataContext } from "../../meta-data";
 
-interface InstanceRendererProps {
+export function GisViewerInstanceManager() {
+  const { id } = useMetadataContext();
+
+  const isAvailable = useSelector(selectGisViewerInstanceIsAvailable(id));
+
+  const dispatch = useDispatch();
+
+  // Adding the GIS viewer
+  useEffect(() => {
+    if (!isAvailable) {
+      dispatch(addGisViewer({ id }));
+    }
+  }, [dispatch, id, isAvailable]);
+
+  // Removing the GIS viewer
+  useEffect(() => {
+    return () => {
+      dispatch(removeGisViewer({ id }));
+    };
+  }, [dispatch, id]);
+
+  return null;
+}
+
+interface InstanceProps {
   children?: ReactNode;
 }
 
-export function Instance({ children }: InstanceRendererProps) {
-  // const isAvailable = useSelector(
-  //   selectGisViewerInstanceIsAvailable("default")
-  // );
-  // const isInstanceAvailable = (selectIsInstanceAvailable(id));
+export function GisViewerInstance({ children = null }: InstanceProps) {
+  const { id } = useMetadataContext();
 
-  return <>{children}</>;
+  const isAvailable = useSelector(selectGisViewerInstanceIsAvailable(id));
+
+  return (
+    <>
+      <GisViewerInstanceManager />
+      {isAvailable ? children : null}
+    </>
+  );
 }
-
-// function InstanceInitializer() {
-//   const { id } = useMetaDataContext();
-
-//   const dispatch = useRootDispatch();
-
-//   const isInstanceAvailable = useRootSelector(selectIsInstanceAvailable(id));
-
-//   useEffect(() => {
-//     if (!isInstanceAvailable) {
-//       dispatch(addInstance({ id }));
-//     }
-
-//     return () => {
-//       dispatch(removeInstance({ id }));
-//     };
-//   }, [dispatch, id, isInstanceAvailable]);
-
-//   return null;
-// }
-
-// interface InstanceRendererProps {
-//   children?: ReactNode;
-// }
-
-// function InstanceRenderer({ children = null }: InstanceProps) {
-//   const { id } = useMetaDataContext();
-
-//   const instanceIsAvailable = useRootSelector(selectIsInstanceAvailable(id));
-
-//   if (instanceIsAvailable) return <>{children}</>;
-//   else return null;
-// }
-
-// interface InstanceProps extends InstanceRendererProps {
-//   //
-// }
-
-// export function Instance({ children = null }: InstanceProps) {
-//   return (
-//     <>
-//       <InstanceInitializer />
-//       <InstanceRenderer>{children}</InstanceRenderer>
-//     </>
-//   );
-// }

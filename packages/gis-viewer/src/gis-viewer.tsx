@@ -1,5 +1,5 @@
 import { Provider } from "react-redux";
-import { Instance } from "./features/instance";
+import { GisViewerInstance } from "./features/instance";
 import { ViewContainer } from "./features/view/container";
 import { MetadataProvider, MetadataProviderProps } from "./meta-data";
 import { combineReducers } from "redux";
@@ -22,9 +22,9 @@ export function GisViewer({ id }: GisViewerProps) {
   return (
     <Provider store={store}>
       <MetadataProvider id={id}>
-        <Instance>
+        <GisViewerInstance>
           <ViewContainer />
-        </Instance>
+        </GisViewerInstance>
       </MetadataProvider>
     </Provider>
   );
