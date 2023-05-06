@@ -9,13 +9,13 @@
     "build": "webpack --config webpack.config.prod.js"
   },
   "dependencies": {
-    "css-loader": "^6.7.3",
     "gis-viewer": "*",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "style-loader": "^3.3.2"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.2",
     "html-webpack-plugin": "^5.5.1",
     "typescript": "^5.0.4",
     "webpack-cli": "^5.0.2",
