@@ -1,23 +1,41 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { DEFAULT_SLICE_PREFIX } from "../../constants";
 import { Coordinate, Dimensions, Limits } from "../../types";
-import { DEFAULT_CENTER_COORDINATE, DEFAULT_DIMENSIONS } from "./constants";
+import {
+  DEFAULT_CENTER_COORDINATE,
+  DEFAULT_DIMENSIONS,
+  DEFAULT_ZOOM_LIMITS,
+  DEFAULT_PROJECTION,
+} from "./constants";
+import {
+  calculateBaseResolution,
+  calculateResolutionFromZoomLevel,
+} from "./utils/resolution-utils";
+import { Projection } from "../projections";
 
 export interface ViewState {
-  // currentResolution: number;
+  currentResolution: number;
   centerCoordinate: Coordinate;
-  // zoomLevelLimits: Limits;
   dimensions: Dimensions;
-  // projection: Projection;
+  projection: Projection;
+  zoomLevelLimits: Limits;
 }
 
+const initialBaseResolution = calculateBaseResolution(
+  DEFAULT_PROJECTION.projectedExtent,
+  DEFAULT_DIMENSIONS
+);
+const initialCurrentResolution = calculateResolutionFromZoomLevel(
+  initialBaseResolution,
+  DEFAULT_ZOOM_LIMITS[0]
+);
+
 const initialState: ViewState = {
-  // baseResolution: initialBaseResolution,
   centerCoordinate: DEFAULT_CENTER_COORDINATE,
-  // currentResolution: initialCurrentResolution,
+  currentResolution: initialCurrentResolution,
   dimensions: DEFAULT_DIMENSIONS,
-  // projection: EPSG_3857,
-  // zoomLevelLimits: [DEFAULT_MIN_ZOOM_LEVEL, DEFAULT_MAX_ZOOM_LEVEL],
+  projection: DEFAULT_PROJECTION,
+  zoomLevelLimits: DEFAULT_ZOOM_LIMITS,
 };
 
 export const viewSlice = createSlice({
