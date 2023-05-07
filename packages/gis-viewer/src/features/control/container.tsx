@@ -21,7 +21,7 @@ export const ControlsContainer = forwardRef<
   return (
     <div
       ref={ref}
-      className="controls-container w-auto h-auto absolute flex flex-col z-10 top-5 left-5"
+      className="controls-container w-auto h-auto absolute flex flex-col items-center justify-center z-10 bottom-5 right-5 gap-4"
     >
       {children}
     </div>

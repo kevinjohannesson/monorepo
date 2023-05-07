@@ -17,7 +17,7 @@ export const MapInfoContainer = forwardRef<
   return (
     <div
       ref={ref}
-      className="map-info-container px-4 py-1 bg-white/[.9] flex gap-2"
+      className="map-info-container rounded-tr-lg pl-4 pr-2 py-1 bg-white/[.9] flex gap-2 "
       style={mapInfoContainerStyle}
     >
       {children}

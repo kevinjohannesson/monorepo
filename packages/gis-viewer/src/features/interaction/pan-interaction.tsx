@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useViewContext } from "../view/context";
 import { useGisViewerDispatch } from "../../slice";
 import { isNull } from "utils";
+import { updateCenterCoordinateByPixel } from "../view/slice";
 
 export function PanInteraction() {
   const { ref } = useViewContext();
@@ -23,7 +24,7 @@ export function PanInteraction() {
     return () => {
       element.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [ref]);
+  }, []);
 
   useEffect(() => {
     const element = ref.current;
@@ -40,7 +41,7 @@ export function PanInteraction() {
       element.removeEventListener("mouseup", handleMouseUpLeave);
       element.removeEventListener("mouseleave", handleMouseUpLeave);
     };
-  }, [ref]);
+  }, []);
 
   useEffect(() => {
     const element = ref.current;
@@ -51,7 +52,7 @@ export function PanInteraction() {
 
       if (!isDragging.current) return;
 
-      // dispatch(updateCenterCoordinateByPixel([-e.movementX, e.movementY]));
+      dispatch(updateCenterCoordinateByPixel([-e.movementX, e.movementY]));
 
       e.stopPropagation();
     };
@@ -61,7 +62,7 @@ export function PanInteraction() {
     return () => {
       element.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [ref, dispatch]);
+  }, []);
 
   return null;
 }

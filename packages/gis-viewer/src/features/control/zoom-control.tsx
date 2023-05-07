@@ -12,7 +12,6 @@ interface ButtonControlProps {
 }
 
 const ZoomInButton = memo(function ({ isDisabled }: ButtonControlProps) {
-  console.log("ZoomInButton");
   const dispatch = useGisViewerDispatch();
 
   const handleClick = (deltaZoom: number) => () => {
@@ -20,15 +19,17 @@ const ZoomInButton = memo(function ({ isDisabled }: ButtonControlProps) {
   };
 
   return (
-    <button className="control" disabled={isDisabled} onClick={handleClick(1)}>
+    <button
+      className="control button"
+      disabled={isDisabled}
+      onClick={handleClick(1)}
+    >
       <AiOutlinePlus />
     </button>
   );
 });
 
 const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
-  console.log("ZoomOutButton");
-
   const dispatch = useGisViewerDispatch();
 
   const handleClick = (deltaZoom: number) => () => {
@@ -36,7 +37,11 @@ const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
   };
 
   return (
-    <button className="control" disabled={isDisabled} onClick={handleClick(-1)}>
+    <button
+      className="control button"
+      disabled={isDisabled}
+      onClick={handleClick(-1)}
+    >
       <AiOutlineMinus />
     </button>
   );
@@ -53,7 +58,7 @@ export function ZoomControl() {
   const isZoomOutDisabled = zoomLevel <= minZoomLevel;
 
   return (
-    <div className="tooltip controls flex flex-col gap-2">
+    <div className="tooltip left flex flex-col items-end gap-2">
       <ZoomInButton isDisabled={isZoomInDisabled} />
       <ZoomOutButton isDisabled={isZoomOutDisabled} />
       <span className="tooltip-content whitespace-nowrap">

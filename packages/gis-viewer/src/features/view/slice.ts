@@ -18,6 +18,7 @@ import {
   calculateZoomLevelFromResolution,
   isZoomLevelWithinLimits,
 } from "./utils/zoom-level-utils";
+import { addVector2d, multiplyVector2d } from "utils";
 
 export interface ViewState {
   currentResolution: number;
@@ -95,11 +96,59 @@ export const viewSlice = createSlice({
         );
       }
     },
+
+    updateZoomLevel: (state, { payload: deltaZoom }: PayloadAction<number>) => {
+      const {
+        currentResolution,
+        zoomLevelLimits,
+        projection: { projectedExtent },
+        dimensions,
+      } = state;
+
+      const baseResolution = calculateBaseResolution(
+        projectedExtent,
+        dimensions
+      );
+
+      const updatedZoomLevel = calculateUpdatedZoomLevel(
+        baseResolution,
+        currentResolution,
+        deltaZoom
+      );
+
+      if (isZoomLevelWithinLimits(updatedZoomLevel, zoomLevelLimits)) {
+        state.currentResolution = calculateResolutionFromZoomLevel(
+          baseResolution,
+          updatedZoomLevel
+        );
+      }
+      // else {
+      //   console.warn(
+      //     "A caller is trying to update the zoom level to a zoom level that is outside the bounds set by `minZoom` and `maxZoom`. This is not allowed."
+      //   );
+      // }
+    },
+
+    updateCenterCoordinateByPixel: (
+      state,
+      { payload: deltaPan }: PayloadAction<Coordinate>
+    ) => {
+      const { currentResolution } = state;
+
+      const offset = multiplyVector2d(currentResolution, deltaPan);
+
+      state.centerCoordinate = addVector2d(state.centerCoordinate, offset);
+    },
   },
 });
 
-export const { updateSlice, resetSlice, updateZoomLevelToClosestInteger } =
-  viewSlice.actions;
+export const {
+  updateSlice,
+  resetSlice,
+  updateZoomLevelToClosestInteger,
+  updateCenterCoordinateByPixel,
+  updateZoomLevel,
+} = viewSlice.actions;
 
 export const selectViewState =
   <T extends keyof ViewState>(key: T) =>

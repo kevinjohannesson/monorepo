@@ -2,7 +2,28 @@
   @apply relative;
 
   & > .tooltip-content {
-    @apply invisible translate-x-full -translate-y-1/2 absolute top-1/2 -right-3 px-2 py-1 rounded bg-slate-700/[.9] text-white;
+    @apply invisible absolute  px-2 py-1 rounded bg-slate-700/[.9] text-white whitespace-nowrap;
+  }
+
+  &.left {
+    & > .tooltip-content {
+      @apply top-1/2 -left-3 -translate-x-full -translate-y-1/2;
+    }
+  }
+  &.right {
+    & > .tooltip-content {
+      @apply top-1/2 -right-3 translate-x-full -translate-y-1/2;
+    }
+  }
+  &.top {
+    & > .tooltip-content {
+      @apply -top-3 left-1/2 translate-x-1/2 -translate-y-full;
+    }
+  }
+  &.bottom {
+    & > .tooltip-content {
+      @apply -bottom-3 left-1/2 -translate-x-1/2 translate-y-full;
+    }
   }
 
   &:hover {

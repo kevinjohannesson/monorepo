@@ -13,6 +13,9 @@ import { CursorCoordinatesMapInfoItem } from "./features/map-info/cursor-coordin
 import { OsmSource } from "./features/source/osm";
 import { ControlsContainer } from "./features/control/container";
 import { ZoomControl } from "./features/control/zoom-control";
+import { PanControl } from "./features/control/pan-control";
+import { ZoomInteraction } from "./features/interaction/zoom-interaction";
+import { PanInteraction } from "./features/interaction/pan-interaction";
 
 const rootReducer = combineReducers({
   gisViewer: slice.reducer,
@@ -34,21 +37,26 @@ export function GisViewer({ id }: GisViewerProps) {
           <View>
             <LayersContainer>
               <Layer>
-                <CrosshairSource />
+                <OsmSource />
               </Layer>
 
               <Layer>
-                <OsmSource />
+                <CrosshairSource />
               </Layer>
             </LayersContainer>
 
             <ControlsContainer>
               <ZoomControl />
+
+              <PanControl />
             </ControlsContainer>
 
             <MapInfoContainer>
               <CursorCoordinatesMapInfoItem />
             </MapInfoContainer>
+
+            <ZoomInteraction />
+            <PanInteraction />
           </View>
         </GisViewerInstance>
       </MetadataProvider>
