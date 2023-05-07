@@ -11,6 +11,8 @@ import { Layer } from "./features/layer";
 import { CrosshairSource } from "./features/source/cross-hair";
 import { CursorCoordinatesMapInfoItem } from "./features/map-info/cursor-coordinates-map-info-item";
 import { OsmSource } from "./features/source/osm";
+import { ControlsContainer } from "./features/control/container";
+import { ZoomControl } from "./features/control/zoom-control";
 
 const rootReducer = combineReducers({
   gisViewer: slice.reducer,
@@ -34,13 +36,15 @@ export function GisViewer({ id }: GisViewerProps) {
               <Layer>
                 <CrosshairSource />
               </Layer>
-            </LayersContainer>
 
-            <LayersContainer>
               <Layer>
                 <OsmSource />
               </Layer>
             </LayersContainer>
+
+            <ControlsContainer>
+              <ZoomControl />
+            </ControlsContainer>
 
             <MapInfoContainer>
               <CursorCoordinatesMapInfoItem />

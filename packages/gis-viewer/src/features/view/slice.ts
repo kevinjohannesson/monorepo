@@ -13,7 +13,11 @@ import {
 } from "./utils/resolution-utils";
 import { Projection } from "../projections";
 import { GisViewerState } from "../../slice";
-import { calculateZoomLevelFromResolution } from "./utils/zoom-level-utils";
+import {
+  calculateUpdatedZoomLevel,
+  calculateZoomLevelFromResolution,
+  isZoomLevelWithinLimits,
+} from "./utils/zoom-level-utils";
 
 export interface ViewState {
   currentResolution: number;
@@ -55,10 +59,47 @@ export const viewSlice = createSlice({
     resetSlice: (state) => {
       Object.assign(state, initialState);
     },
+
+    updateZoomLevelToClosestInteger: (
+      state,
+      { payload: deltaZoom }: PayloadAction<number>
+    ) => {
+      const {
+        currentResolution,
+        zoomLevelLimits,
+        projection: { projectedExtent },
+        dimensions,
+      } = state;
+
+      const baseResolution = calculateBaseResolution(
+        projectedExtent,
+        dimensions
+      );
+
+      let updatedZoomLevel = calculateUpdatedZoomLevel(
+        baseResolution,
+        currentResolution,
+        deltaZoom
+      );
+
+      if (deltaZoom < 0) {
+        updatedZoomLevel = Math.ceil(updatedZoomLevel);
+      } else {
+        updatedZoomLevel = Math.floor(updatedZoomLevel);
+      }
+
+      if (isZoomLevelWithinLimits(updatedZoomLevel, zoomLevelLimits)) {
+        state.currentResolution = calculateResolutionFromZoomLevel(
+          baseResolution,
+          updatedZoomLevel
+        );
+      }
+    },
   },
 });
 
-export const { updateSlice, resetSlice } = viewSlice.actions;
+export const { updateSlice, resetSlice, updateZoomLevelToClosestInteger } =
+  viewSlice.actions;
 
 export const selectViewState =
   <T extends keyof ViewState>(key: T) =>

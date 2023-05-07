@@ -311,6 +311,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@csstools/selector-specificity@^2.0.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.2.0.tgz#2cbcf822bf3764c9658c4d2e568bd0c0cb748016"
+  integrity sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw==
+
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"
@@ -6535,6 +6540,14 @@ postcss-nested@^6.0.1:
   integrity sha512-mEp4xPMi5bSWiMbsgoPfcP74lsWLHkQbZc3sY+jWYd65CUwXrUaTp0fmNpa01ZcETKlIgUdFN/MpS2xZtqL9dQ==
   dependencies:
     postcss-selector-parser "^6.0.11"
+
+postcss-nesting@^11.2.2:
+  version "11.2.2"
+  resolved "https://registry.yarnpkg.com/postcss-nesting/-/postcss-nesting-11.2.2.tgz#ddedfea5a1fdcd8d753298d82297ad15d5640c0f"
+  integrity sha512-aOTiUniAB1bcPE6GGiynWRa6PZFPhOTAm5q3q5cem6QeSijIHHkWr6gs65ukCZMXeak8yXeZVbBJET3VM+HlhA==
+  dependencies:
+    "@csstools/selector-specificity" "^2.0.0"
+    postcss-selector-parser "^6.0.10"
 
 postcss-reporter@^7.0.0:
   version "7.0.5"

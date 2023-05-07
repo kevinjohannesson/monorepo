@@ -36,6 +36,7 @@
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "postcss-nesting": "^11.2.2"
   }
 }

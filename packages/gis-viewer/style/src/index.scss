@@ -2,3 +2,6 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+
+@import "./features/control.scss";
+@import "./features/tooltip.scss";

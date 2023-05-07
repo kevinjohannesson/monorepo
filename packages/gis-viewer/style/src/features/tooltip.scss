@@ -1,0 +1,13 @@
+.tooltip {
+  @apply relative;
+
+  & > .tooltip-content {
+    @apply invisible translate-x-full -translate-y-1/2 absolute top-1/2 -right-3 px-2 py-1 rounded bg-slate-700/[.9] text-white;
+  }
+
+  &:hover {
+    & > .tooltip-content {
+      @apply visible;
+    }
+  }
+}
