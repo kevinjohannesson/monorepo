@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { DEFAULT_SLICE_PREFIX } from "../../constants";
 import { Coordinate, Dimensions, Limits } from "../../types";
 import {
@@ -12,6 +12,8 @@ import {
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
 import { Projection } from "../projections";
+import { GisViewerState } from "../../slice";
+import { calculateZoomLevelFromResolution } from "./utils/zoom-level-utils";
 
 export interface ViewState {
   currentResolution: number;
@@ -40,6 +42,37 @@ const initialState: ViewState = {
 
 export const viewSlice = createSlice({
   name: `${DEFAULT_SLICE_PREFIX}/view`,
+  // name: "view",
   initialState,
-  reducers: {},
+  reducers: {
+    updateSlice: (state, { payload }: PayloadAction<Partial<ViewState>>) => {
+      Object.assign(state, {
+        ...state,
+        ...payload,
+      });
+    },
+
+    resetSlice: (state) => {
+      Object.assign(state, initialState);
+    },
+  },
 });
+
+export const { updateSlice, resetSlice } = viewSlice.actions;
+
+export const selectViewState =
+  <T extends keyof ViewState>(key: T) =>
+  (state: GisViewerState) =>
+    state[viewSlice.name][key];
+
+export const selectZoomLevel = (state: GisViewerState) => {
+  const {
+    currentResolution,
+    projection: { projectedExtent },
+    dimensions,
+  } = state[viewSlice.name];
+
+  const baseResolution = calculateBaseResolution(projectedExtent, dimensions);
+
+  return calculateZoomLevelFromResolution(baseResolution, currentResolution);
+};

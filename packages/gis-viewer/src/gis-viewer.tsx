@@ -5,6 +5,9 @@ import { GisViewerInstance } from "./features/instance";
 import { View } from "./features/view";
 import { MetadataProvider, MetadataProviderProps } from "./meta-data";
 import { slice } from "./slice";
+import { LayersContainer } from "./features/layers/container";
+import { Layer } from "./features/layers/layer";
+import { CrosshairSource } from "./features/source/cross-hair";
 
 const rootReducer = combineReducers({
   gisViewer: slice.reducer,
@@ -23,7 +26,13 @@ export function GisViewer({ id }: GisViewerProps) {
     <Provider store={store}>
       <MetadataProvider id={id}>
         <GisViewerInstance>
-          <View />
+          <View>
+            <LayersContainer>
+              <Layer>
+                <CrosshairSource />
+              </Layer>
+            </LayersContainer>
+          </View>
         </GisViewerInstance>
       </MetadataProvider>
     </Provider>

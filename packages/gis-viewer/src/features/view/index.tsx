@@ -15,6 +15,7 @@ import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
+import { updateSlice } from "./slice";
 
 export interface ResolutionProps {
   initialResolution: number;
@@ -51,7 +52,7 @@ export function View({
 
   const ref = useRef<HTMLDivElement | null>(null);
 
-  // const dispatch = useGisViewerDispatch();
+  const dispatch = useGisViewerDispatch();
 
   useEffect(() => {
     const baseResolution = calculateBaseResolution(
@@ -65,17 +66,17 @@ export function View({
 
     console.log({ baseResolution });
     console.log({ currentResolution });
-    // dispatch(
-    //   updateSlice({
-    //     centerCoordinate: initialCenterCoordinate,
-    //     currentResolution,
-    //     dimensions,
-    //     zoomLevelLimits,
-    //   })
-    // );
+    dispatch(
+      updateSlice({
+        centerCoordinate: initialCenterCoordinate,
+        currentResolution,
+        dimensions,
+        zoomLevelLimits,
+      })
+    );
   }, [
     dimensions,
-    // dispatch,
+    dispatch,
     initialCenterCoordinate,
     initialResolution,
     initialZoomLevel,
