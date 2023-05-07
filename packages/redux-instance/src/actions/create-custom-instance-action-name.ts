@@ -1,4 +1,4 @@
-import { toCamelCase, toPascalCase } from "utils/src/transform-string";
+import { toCamelCase, toPascalCase } from "utils";
 
 /**
  * CustomInstanceActionName represents the name of a custom instance action.

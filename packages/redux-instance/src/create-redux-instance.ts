@@ -8,7 +8,7 @@ import {
 } from "@reduxjs/toolkit";
 import { createObjectWithNamedActionInstance } from "./actions/create-object-with-named-action-instance";
 import { createObjectWithNamedHookInstance } from "./hooks/create-object-with-named-hook-instance";
-import { createStoreIntanceHooks } from "./hooks/create-store-instance-hooks";
+import { createInstanceHookFactories } from "./hooks/create-store-instance-hooks";
 import { createObjectWithNamedSelectorInstance } from "./selectors/create-object-with-named-selector-instance";
 import { createStoreInstanceSelectors } from "./selectors/create-store-instance-selectors";
 import { Instances, InstancesSliceState } from "./types";
@@ -87,8 +87,10 @@ export function createReduxInstance<N extends string, S>(
   const { selectIsInstanceAvailable, selectInstance } =
     createStoreInstanceSelectors<S>()(name);
 
-  const { useSliceInstanceDispatch, useSliceInstanceSelector } =
-    createStoreIntanceHooks(name, selectInstance);
+  const {
+    useInstanceDispatchFactory: useSliceInstanceDispatchFactory,
+    useInstanceSelectorFactory: useSliceInstanceSelectorFactory,
+  } = createInstanceHookFactories(name, selectInstance);
 
   return {
     slice,
@@ -112,12 +114,12 @@ export function createReduxInstance<N extends string, S>(
       ...createObjectWithNamedHookInstance(
         name,
         "selector",
-        useSliceInstanceSelector
+        useSliceInstanceSelectorFactory
       ),
       ...createObjectWithNamedHookInstance(
         name,
         "dispatch",
-        useSliceInstanceDispatch
+        useSliceInstanceDispatchFactory
       ),
     },
   };
@@ -171,11 +173,14 @@ const testInstanceReducer = combineReducers({
 const {
   selectors: { selectMapprInstance, selectMapprInstanceIsAvailable },
   actions: { addMappr, removeMappr },
-  hooks: { useMapprInstanceDispatch, useMapprInstanceSelector },
+  hooks: { useMapprInstanceDispatchFactory, useMapprInstanceSelectorFactory },
 } = createReduxInstance("mappr", testInstanceReducer, "mapprInstance");
 
 const useFoo = () => {
-  const foo1 = useMapprInstanceSelector("default")(selectZoomLevel);
-  const foo2 = useMapprInstanceSelector("default")(selectTestById(1));
+  const foo1 = useMapprInstanceSelectorFactory("default")(selectZoomLevel);
+  const foo2 = useMapprInstanceSelectorFactory("default")(selectTestById(1));
+
+  const dispatch = useMapprInstanceDispatchFactory("default")();
+  dispatch(addMappr);
   // const foo2 = useMapprInstanceSelector("default")(selectMapprInstanceIsAvailable("foo"));
 };

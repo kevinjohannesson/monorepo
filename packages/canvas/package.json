@@ -1,0 +1,12 @@
+{
+  "name": "canvas",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "utils": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

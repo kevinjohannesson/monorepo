@@ -1451,9 +1451,14 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
+"@types/lodash@^3.2.4":
+  version "3.10.5"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.5.tgz#957da1902e6b9b6f20512fe83372a8a27bf6214e"
+  integrity sha512-5q+juLIas01ex96TU0va8aoRTt6fhu1YMaGMcViXPgAYqG1VbzAsJ8PdnlUFZE65+ZZmj+1+lg0snoiHhjN1Jw==
+
 "@types/lodash@^4.14.194":
   version "4.14.194"
-  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.194.tgz"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.194.tgz#b71eb6f7a0ff11bff59fc987134a093029258a76"
   integrity sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==
 
 "@types/mime@*":

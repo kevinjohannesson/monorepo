@@ -1,4 +1,4 @@
-import { toPascalCase } from "utils/src/transform-string";
+import { toPascalCase } from "utils";
 
 /**
  * CustomInstanceSelectorName represents the name of a custom instance selector.
