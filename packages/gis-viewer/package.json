@@ -5,29 +5,35 @@
   "license": "ISC",
   "main": "index.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build:css": "postcss style/src/index.scss -o style/dist/index.css"
   },
   "bugs": {
     "url": "https://github.com/kevinjohannesson/monorepo/issues"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.8",
-    "@emotion/styled": "^11.10.8",
     "@reduxjs/toolkit": "^1.9.5",
+    "autoprefixer": "^10.4.14",
+    "canvas": "*",
     "jest": "^29.5.0",
     "lodash": "^4.17.21",
+    "node-sass": "^8.0.0",
+    "postcss": "^8.4.23",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.8.0",
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
     "redux-instance": "*",
-    "utils": "*",
-    "canvas": "*"
+    "tailwindcss": "^3.3.2",
+    "utils": "*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
+    "@types/lodash": "^3.2.4",
+    "postcss-cli": "^10.1.0",
+    "postcss-import": "^15.1.0",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4",
-    "@types/lodash": "^3.2.4"
+    "typescript": "^5.0.4"
   }
 }

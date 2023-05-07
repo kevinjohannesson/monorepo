@@ -65,14 +65,19 @@ export const selectViewState =
   (state: GisViewerState) =>
     state[viewSlice.name][key];
 
-export const selectZoomLevel = (state: GisViewerState) => {
+export const selectBaseResolution = (state: GisViewerState) => {
   const {
-    currentResolution,
     projection: { projectedExtent },
     dimensions,
   } = state[viewSlice.name];
 
-  const baseResolution = calculateBaseResolution(projectedExtent, dimensions);
+  return calculateBaseResolution(projectedExtent, dimensions);
+};
+
+export const selectZoomLevel = (state: GisViewerState) => {
+  const { currentResolution } = state[viewSlice.name];
+
+  const baseResolution = selectBaseResolution(state);
 
   return calculateZoomLevelFromResolution(baseResolution, currentResolution);
 };

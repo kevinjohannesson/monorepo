@@ -1,6 +1,11 @@
-import { createContext, ReactNode, RefObject, useRef } from "react";
+import {
+  createContext,
+  CSSProperties,
+  ReactNode,
+  RefObject,
+  useRef,
+} from "react";
 import { useRequiredContext } from "utils";
-import styled from "@emotion/styled";
 import { DEFAULT_IS_VISIBLE, DEFAULT_OPACITY } from "./constants";
 import { useGisViewerSelector } from "../../slice";
 import { selectViewState } from "../view/slice";
@@ -14,30 +19,22 @@ export const LayerContext = createContext({} as LayerContextValue);
 export const useLayerContext = () =>
   useRequiredContext(LayerContext, "Layer Context");
 
-interface LayerBaseProps {
+const LayerBaseStyle: CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+};
+
+export interface LayerProps {
+  children?: ReactNode;
   isVisible?: boolean;
   opacity?: number;
-}
-
-const LayerBase = styled("canvas")<LayerBaseProps>(
-  ({ isVisible = DEFAULT_IS_VISIBLE, opacity = DEFAULT_OPACITY }) => ({
-    position: "absolute",
-    top: 0,
-    left: 0,
-    opacity,
-    visibility: isVisible ? "visible" : "hidden",
-  })
-);
-
-export interface LayerProps extends LayerBaseProps {
-  children?: ReactNode;
 }
 
 export function Layer({
   children,
   opacity = DEFAULT_OPACITY,
   isVisible = DEFAULT_IS_VISIBLE,
-  ...props
 }: LayerProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
@@ -45,7 +42,16 @@ export function Layer({
 
   return (
     <LayerContext.Provider value={{ ref }}>
-      <LayerBase ref={ref} width={width} height={height} {...props} />
+      <canvas
+        ref={ref}
+        width={width}
+        height={height}
+        style={{
+          ...LayerBaseStyle,
+          opacity,
+          visibility: isVisible ? "visible" : "hidden",
+        }}
+      />
       {children}
     </LayerContext.Provider>
   );

@@ -1,9 +1,23 @@
-import styled from "@emotion/styled";
+import { CSSProperties, ReactNode, forwardRef } from "react";
 
-export const LayersContainer = styled("div")(() => ({
+const layersContainerStyle: CSSProperties = {
   position: "absolute",
   top: 0,
   left: 0,
   width: "100%",
   height: "100%",
-}));
+};
+
+export interface LayersContainerProps {
+  children: ReactNode;
+}
+
+export const LayersContainer = forwardRef<HTMLDivElement, LayersContainerProps>(
+  ({ children }, ref) => {
+    return (
+      <div ref={ref} className="layers-container" style={layersContainerStyle}>
+        {children}
+      </div>
+    );
+  }
+);
