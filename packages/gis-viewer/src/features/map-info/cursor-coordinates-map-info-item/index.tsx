@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MdOutlineMouse } from "react-icons/md";
 import {
+  addVector2d,
   divideVector2d,
   isNull,
   multiplyVector2d,
@@ -24,6 +25,9 @@ export function CursorCoordinatesMapInfoItem({
   const currentResolution = useGisViewerSelector(
     selectViewState("currentResolution")
   );
+  const centerCoordinate = useGisViewerSelector(
+    selectViewState("centerCoordinate")
+  );
 
   const [cursorCoordinate, setCursorCoordinate] = useState<Coordinate | null>(
     null
@@ -39,17 +43,25 @@ export function CursorCoordinatesMapInfoItem({
           Math.max(e.offsetX, 0),
           Math.max(e.offsetY, 0),
         ];
+
         const viewCenterPixelCoordinate: Coordinate = divideVector2d(
           dimensions,
           2
         );
+
         const cursorOffsetFromViewCenter: Coordinate = subtractVector2d(
           cursorPixelCoordinateInView,
           viewCenterPixelCoordinate
         );
-        const cursorProjectedCoordinate: Coordinate = multiplyVector2d(
+
+        const cursorProjectedOffset: Coordinate = multiplyVector2d(
           cursorOffsetFromViewCenter,
           currentResolution
+        );
+
+        const cursorProjectedCoordinate: Coordinate = addVector2d(
+          cursorProjectedOffset,
+          centerCoordinate
         );
 
         frameRef.current = requestAnimationFrame(() => {
