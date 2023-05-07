@@ -1,4 +1,4 @@
-import { capitalize, uncapitalize } from "utils";
+import { toCamelCase, toPascalCase } from "utils/src/transform-string";
 
 /**
  * CustomInstanceActionName represents the name of a custom instance action.
@@ -38,9 +38,9 @@ export function createCustomInstanceActionName<
   T extends string,
   S extends string = ""
 >(name: N, type: T, suffix?: S): CustomInstanceActionName<N, T, S> {
-  const capitalizedName = capitalize(name);
-  const uncapitalizedType = uncapitalize(type);
-  const capitalizedSuffix = uncapitalize(suffix || "");
+  const capitalizedName = toPascalCase(name);
+  const uncapitalizedType = toCamelCase(type);
+  const capitalizedSuffix = toPascalCase(suffix || "");
   return `${uncapitalizedType}${capitalizedName}${capitalizedSuffix}` as CustomInstanceActionName<
     N,
     T,

@@ -1,4 +1,4 @@
-import { capitalize } from "utils";
+import { toPascalCase } from "utils/src/transform-string";
 
 /**
  * CustomInstanceSelectorName represents the name of a custom instance selector.
@@ -31,8 +31,8 @@ export function createCustomInstanceSelectorName<
   N extends string,
   T extends string
 >(name: N, type: T): CustomInstanceSelectorName<N, T> {
-  const capitalizedName = capitalize(name);
-  const capitalizedType = capitalize(type);
+  const capitalizedName = toPascalCase(name);
+  const capitalizedType = toPascalCase(type);
   return `select${capitalizedName}${capitalizedType}` as CustomInstanceSelectorName<
     N,
     T

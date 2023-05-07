@@ -1,4 +1,4 @@
-import { capitalize } from "utils";
+import { toPascalCase } from "utils/src/transform-string";
 
 /**
  * CustomInstanceHookName represents the name of a custom instance hook.
@@ -31,6 +31,10 @@ export function createCustomInstanceHookName<
   N extends string,
   T extends string
 >(name: N, type: T): CustomInstanceHookName<N, T> {
-  const capitalizedName = capitalize(name);
-  return `use${capitalizedName}Instance${type}` as CustomInstanceHookName<N, T>;
+  const capitalizedName = toPascalCase(name);
+  const capitalizedType = toPascalCase(type);
+  return `use${capitalizedName}Instance${capitalizedType}` as CustomInstanceHookName<
+    N,
+    T
+  >;
 }

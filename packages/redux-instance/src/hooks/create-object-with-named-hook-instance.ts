@@ -23,6 +23,6 @@ export function createObjectWithNamedHookInstance<
   F extends (...args: any[]) => any
 >(name: N, type: T, fn: F): Record<CustomInstanceHookName<N, T>, F> {
   return {
-    [createCustomInstanceHookName(type, name)]: fn,
+    [createCustomInstanceHookName(name, type)]: fn,
   } as Record<CustomInstanceHookName<N, T>, F>;
 }

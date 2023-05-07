@@ -4,43 +4,43 @@ describe("createCustomInstanceActionName", () => {
   it("should return the correct custom instance action name with a single-word name, type, and suffix", () => {
     const actionName = createCustomInstanceActionName(
       "myInstance",
-      "counter",
+      "count",
       "action"
     );
-    expect(actionName).toBe("counterMyInstanceAction");
+    expect(actionName).toBe("countMyInstanceAction");
   });
 
   it("should return the correct custom instance action name with multi-word name, type, and suffix", () => {
     const actionName = createCustomInstanceActionName(
       "myGreatInstance",
-      "fancyCounter",
+      "fancyCount",
       "awesomeAction"
     );
-    expect(actionName).toBe("fancyCounterMyGreatInstanceAwesomeAction");
+    expect(actionName).toBe("fancyCountMyGreatInstanceAwesomeAction");
   });
 
   it("should return the correct custom instance action name with mixed-case name, type, and suffix", () => {
     const actionName = createCustomInstanceActionName(
       "MyMixedCaseInstance",
-      "fancyMixedCaseCounter",
+      "fancyMixedCaseCount",
       "awesomeMixedCaseAction"
     );
     expect(actionName).toBe(
-      "fancyMixedCaseCounterMyMixedCaseInstanceAwesomeMixedCaseAction"
+      "fancyMixedCaseCountMyMixedCaseInstanceAwesomeMixedCaseAction"
     );
   });
 
   it("should return the correct custom instance action name with special characters in name, type, and suffix", () => {
     const actionName = createCustomInstanceActionName(
       "my-instance",
-      "fancy_counter",
+      "fancy_count",
       "awesome_action"
     );
-    expect(actionName).toBe("fancyCounterMyInstanceAwesomeAction");
+    expect(actionName).toBe("fancyCountMyInstanceAwesomeAction");
   });
 
   it("should return the correct custom instance action name with no suffix provided", () => {
-    const actionName = createCustomInstanceActionName("myInstance", "counter");
-    expect(actionName).toBe("counterMyInstance");
+    const actionName = createCustomInstanceActionName("myInstance", "count");
+    expect(actionName).toBe("countMyInstance");
   });
 });
