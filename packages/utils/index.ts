@@ -1,5 +1,5 @@
 export { useRequiredContext } from "./src/use-required-context";
-export { assertNotNull } from "./src/assert";
+export { assertNotNull, isNull, isNotNull } from "./src/assert";
 export { deg2rad, rad2deg } from "./src/convert";
 export {
   capitalize,
