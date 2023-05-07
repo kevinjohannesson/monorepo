@@ -5,11 +5,12 @@ import { GisViewerInstance } from "./features/instance";
 import { View } from "./features/view";
 import { MetadataProvider, MetadataProviderProps } from "./meta-data";
 import { slice } from "./slice";
-import { LayersContainer } from "./features/layers/container";
+import { LayersContainer } from "./features/layer/container";
 import { MapInfoContainer } from "./features/map-info/container";
-import { Layer } from "./features/layers/layer";
+import { Layer } from "./features/layer";
 import { CrosshairSource } from "./features/source/cross-hair";
 import { CursorCoordinatesMapInfoItem } from "./features/map-info/cursor-coordinates-map-info-item";
+import { OsmSource } from "./features/source/osm";
 
 const rootReducer = combineReducers({
   gisViewer: slice.reducer,
@@ -32,6 +33,12 @@ export function GisViewer({ id }: GisViewerProps) {
             <LayersContainer>
               <Layer>
                 <CrosshairSource />
+              </Layer>
+            </LayersContainer>
+
+            <LayersContainer>
+              <Layer>
+                <OsmSource />
               </Layer>
             </LayersContainer>
 

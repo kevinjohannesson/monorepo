@@ -7,7 +7,7 @@ import {
   calculateCenterCoordinate,
   subtractVector2d,
 } from "utils";
-import { useLayerContext } from "../layers/layer";
+import { useLayerContext } from "../layer";
 import { selectViewState } from "../view/slice";
 import { useGisViewerSelector } from "../../slice";
 
