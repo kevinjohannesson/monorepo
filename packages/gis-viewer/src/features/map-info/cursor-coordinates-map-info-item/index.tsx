@@ -1,44 +1,45 @@
-import { useEffect, useRef, useState } from "react";
+import { type Coordinate } from "../../../types";
 import { MdOutlineMouse } from "react-icons/md";
+import { type ReactElement, useEffect, useRef, useState } from "react";
 import {
   addVector2d,
   divideVector2d,
+  isNotNull,
   isNull,
   multiplyVector2d,
   subtractVector2d,
 } from "utils";
-import { useGisViewerSelector } from "../../../slice";
-import { Coordinate } from "../../../types";
-import { useViewContext } from "../../view/context";
 import { selectViewState } from "../../view/slice";
+import { useGisViewerSelector } from "../../../slice";
+import { useViewContext } from "../../view/context";
 
 export function CursorCoordinatesMapInfoItem({
   placeholderText = "Cursor is out of view",
 }: {
   placeholderText?: string | null;
-}) {
+}): ReactElement {
   const frameRef = useRef<number | null>(null);
 
   const { ref } = useViewContext();
 
   const dimensions = useGisViewerSelector(selectViewState("dimensions"));
   const currentResolution = useGisViewerSelector(
-    selectViewState("currentResolution")
+    selectViewState("currentResolution"),
   );
   const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate")
+    selectViewState("centerCoordinate"),
   );
 
   const [cursorCoordinate, setCursorCoordinate] = useState<Coordinate | null>(
-    null
+    null,
   );
 
   useEffect(() => {
     const element = ref.current;
     if (isNull(element)) return;
 
-    const listener = (e: MouseEvent) => {
-      if (!frameRef.current) {
+    const listener = (e: MouseEvent): void => {
+      if (isNull(frameRef.current)) {
         const cursorPixelCoordinateInView: Coordinate = [
           Math.max(e.offsetX, 0),
           Math.max(e.offsetY, 0),
@@ -46,27 +47,27 @@ export function CursorCoordinatesMapInfoItem({
 
         const viewCenterPixelCoordinate: Coordinate = divideVector2d(
           dimensions,
-          2
+          2,
         );
 
         const cursorOffsetFromViewCenter: Coordinate = subtractVector2d(
           cursorPixelCoordinateInView,
-          viewCenterPixelCoordinate
+          viewCenterPixelCoordinate,
         );
 
         const cursorProjectedOffset: Coordinate = multiplyVector2d(
           cursorOffsetFromViewCenter,
-          currentResolution
+          currentResolution,
         );
 
         const cursorProjectedCoordinate: Coordinate = addVector2d(
           cursorProjectedOffset,
-          centerCoordinate
+          centerCoordinate,
         );
 
         frameRef.current = requestAnimationFrame(() => {
           setCursorCoordinate(
-            cursorProjectedCoordinate.map(Math.round) as Coordinate
+            cursorProjectedCoordinate.map(Math.round) as Coordinate,
           );
           frameRef.current = null;
         });
@@ -84,8 +85,8 @@ export function CursorCoordinatesMapInfoItem({
     const element = ref.current;
     if (isNull(element)) return;
 
-    const listener = () => {
-      if (frameRef.current) {
+    const listener = (): void => {
+      if (isNotNull(frameRef.current)) {
         cancelAnimationFrame(frameRef.current);
         frameRef.current = null;
       }
@@ -99,9 +100,10 @@ export function CursorCoordinatesMapInfoItem({
     };
   }, [ref, frameRef]);
 
-  const coordinatesOrPlaceholder = cursorCoordinate
-    ? `x: ${cursorCoordinate[0]}, y: ${cursorCoordinate[1]}`
-    : placeholderText;
+  const coordinatesOrPlaceholder =
+    cursorCoordinate != null
+      ? `x: ${cursorCoordinate[0]}, y: ${cursorCoordinate[1]}`
+      : placeholderText;
 
   return (
     <div

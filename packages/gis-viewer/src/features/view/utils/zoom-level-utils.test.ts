@@ -1,4 +1,4 @@
-import { Limits } from "../../../types";
+import { type Limits } from "../../../types";
 import {
   calculateUpdatedZoomLevel,
   calculateZoomLevelFromResolution,
@@ -27,7 +27,7 @@ describe("calculateUpdatedZoomLevel", () => {
     const result = calculateUpdatedZoomLevel(
       baseResolution,
       currentResolution,
-      deltaZoom
+      deltaZoom,
     );
 
     expect(result).toBeCloseTo(expectedUpdatedZoomLevel);

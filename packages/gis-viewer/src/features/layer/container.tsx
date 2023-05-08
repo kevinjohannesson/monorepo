@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode, forwardRef } from "react";
+import { type CSSProperties, type ReactNode, forwardRef } from "react";
 
 const layersContainerStyle: CSSProperties = {
   position: "absolute",
@@ -19,5 +19,7 @@ export const LayersContainer = forwardRef<HTMLDivElement, LayersContainerProps>(
         {children}
       </div>
     );
-  }
+  },
 );
+
+LayersContainer.displayName = "LayersContainer";

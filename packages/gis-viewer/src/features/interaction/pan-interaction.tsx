@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
-import { useViewContext } from "../view/context";
-import { useGisViewerDispatch } from "../../slice";
 import { isNull } from "utils";
 import { updateCenterCoordinateByPixel } from "../view/slice";
+import { useEffect, useRef } from "react";
+import { useGisViewerDispatch } from "../../slice";
+import { useViewContext } from "../view/context";
 
-export function PanInteraction() {
+export function PanInteraction(): null {
   const { ref } = useViewContext();
 
   const dispatch = useGisViewerDispatch();
@@ -15,7 +15,7 @@ export function PanInteraction() {
     const element = ref.current;
     if (isNull(element)) return;
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (): void => {
       isDragging.current = true;
     };
 
@@ -30,7 +30,7 @@ export function PanInteraction() {
     const element = ref.current;
     if (isNull(element)) return;
 
-    const handleMouseUpLeave = () => {
+    const handleMouseUpLeave = (): void => {
       isDragging.current = false;
     };
 
@@ -47,7 +47,7 @@ export function PanInteraction() {
     const element = ref.current;
     if (isNull(element)) return;
 
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
+    const handleMouseMove = (e: globalThis.MouseEvent): void => {
       e.preventDefault();
 
       if (!isDragging.current) return;

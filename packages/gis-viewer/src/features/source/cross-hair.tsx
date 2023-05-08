@@ -1,15 +1,15 @@
-import { useEffect } from "react";
+import { type Coordinate, type Dimensions } from "../../types";
 import { RenderType, renderRectangle } from "canvas";
-import { Coordinate, Dimensions } from "../../types";
 import {
   addVector2d,
   assertNotNull,
   calculateCenterCoordinate,
   subtractVector2d,
 } from "utils";
-import { useLayerContext } from "../layer";
 import { selectViewState } from "../view/slice";
+import { useEffect } from "react";
 import { useGisViewerSelector } from "../../slice";
+import { useLayerContext } from "../layer";
 
 interface CrosshairLineConfig {
   startCoordinate: Coordinate;
@@ -19,18 +19,18 @@ interface CrosshairLineConfig {
 
 const renderCrosshairLine = (
   canvas: HTMLCanvasElement,
-  { startCoordinate, lineDimensions, fillStyle }: CrosshairLineConfig
-) => {
+  { startCoordinate, lineDimensions, fillStyle }: CrosshairLineConfig,
+): void => {
   renderRectangle(
     canvas,
     startCoordinate.map(Math.floor) as Coordinate,
     lineDimensions,
     RenderType.FILL,
-    { fillStyle }
+    { fillStyle },
   );
 };
 
-export function CrosshairSource() {
+export function CrosshairSource(): null {
   const { ref } = useLayerContext();
 
   const viewDimensions = useGisViewerSelector(selectViewState("dimensions"));
@@ -57,7 +57,7 @@ export function CrosshairSource() {
       ]),
       lineDimensions: addVector2d(
         [crosshairLineLength, crosshairLineWidth],
-        [padding, padding]
+        [padding, padding],
       ),
       fillStyle: "white",
     });
@@ -69,7 +69,7 @@ export function CrosshairSource() {
       ]),
       lineDimensions: addVector2d(
         [crosshairLineWidth, crosshairLineLength],
-        padding
+        padding,
       ),
       fillStyle: "white",
     });

@@ -1,4 +1,4 @@
-import { Projection } from ".";
+import { type Projection } from ".";
 
 export const EPSG_3857: Projection = {
   name: "WGS 84 / Pseudo-Mercator",

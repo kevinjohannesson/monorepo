@@ -1,10 +1,10 @@
+import { type Coordinate } from "../../../../types";
 import { multiplyVector2d, subtractVector2d } from "utils";
-import { Coordinate } from "../../../../types";
 
 export function calculateRenderedTileCenterOffset(
   renderedTileSize: number,
   fractionalTileCoordinate: Coordinate,
-  integerTileCoordinate: Coordinate
+  integerTileCoordinate: Coordinate,
 ): Coordinate {
   const renderedCenter: Coordinate = [
     renderedTileSize / 2,
@@ -13,7 +13,7 @@ export function calculateRenderedTileCenterOffset(
 
   const difference = subtractVector2d(
     fractionalTileCoordinate,
-    integerTileCoordinate
+    integerTileCoordinate,
   );
 
   const offset = multiplyVector2d(difference, [

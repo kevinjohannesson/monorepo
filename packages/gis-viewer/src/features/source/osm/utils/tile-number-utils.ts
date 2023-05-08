@@ -1,8 +1,10 @@
-import proj4 from "proj4";
-import { Coordinate } from "../../../../types";
+import { type Coordinate } from "../../../../types";
 import { deg2rad } from "utils";
+import proj4 from "proj4";
 
-export function calculateTotalTilesPerAxisAtZoomLevel(zoomLevel: number) {
+export function calculateTotalTilesPerAxisAtZoomLevel(
+  zoomLevel: number,
+): number {
   return Math.pow(2, zoomLevel);
 }
 
@@ -12,20 +14,20 @@ export function calculateMaxTileNumberAtZoomLevel(zoomLevel: number): number {
 
 function calculateFractionalTileNumberX(
   longitude: number,
-  numberOfTilesPerAxis: number
+  numberOfTilesPerAxis: number,
 ): number {
   return numberOfTilesPerAxis * ((longitude + 180) / 360);
 }
 
 function calculateFractionalTileNumberY(
   latitude: number,
-  numberOfTilesPerAxis: number
+  numberOfTilesPerAxis: number,
 ): number {
   return (
     (numberOfTilesPerAxis *
       (1 -
         Math.log(
-          Math.tan(deg2rad(latitude)) + 1 / Math.cos(deg2rad(latitude))
+          Math.tan(deg2rad(latitude)) + 1 / Math.cos(deg2rad(latitude)),
         ) /
           Math.PI)) /
     2
@@ -34,16 +36,16 @@ function calculateFractionalTileNumberY(
 
 function calculateFractionalTileNumbersFromLonLat(
   [longitude, latitude]: Coordinate,
-  numberOfTilesPerAxis: number
+  numberOfTilesPerAxis: number,
 ): Coordinate {
   const xFractionalTileNumber = calculateFractionalTileNumberX(
     longitude,
-    numberOfTilesPerAxis
+    numberOfTilesPerAxis,
   );
 
   const yFractionalTileNumber = calculateFractionalTileNumberY(
     latitude,
-    numberOfTilesPerAxis
+    numberOfTilesPerAxis,
   );
 
   return [xFractionalTileNumber, yFractionalTileNumber];
@@ -52,8 +54,8 @@ function calculateFractionalTileNumbersFromLonLat(
 export function calculateFractionalTileNumbers(
   coordinate: Coordinate,
   sourceProjectionCode: string,
-  zoomLevel: number
-) {
+  zoomLevel: number,
+): Coordinate {
   const lonLatCoordinate = proj4(sourceProjectionCode, "EPSG:4326", coordinate);
 
   const numberOfTilesPerAxisAtZoomLevel =
@@ -61,19 +63,19 @@ export function calculateFractionalTileNumbers(
 
   return calculateFractionalTileNumbersFromLonLat(
     lonLatCoordinate,
-    numberOfTilesPerAxisAtZoomLevel
+    numberOfTilesPerAxisAtZoomLevel,
   );
 }
 
 export function calculateTileNumbers(
   coordinate: Coordinate,
   sourceProjectionCode: string,
-  zoomLevel: number
+  zoomLevel: number,
 ): Coordinate {
   const fractionalTileNumbers = calculateFractionalTileNumbers(
     coordinate,
     sourceProjectionCode,
-    zoomLevel
+    zoomLevel,
   );
 
   return fractionalTileNumbers.map(Math.floor) as Coordinate;
@@ -81,8 +83,8 @@ export function calculateTileNumbers(
 
 export function calculateWrappedTileNumberX(
   urlParameterX: number,
-  zoomLevel: number
-) {
+  zoomLevel: number,
+): number {
   const totalTilesPerAxis = calculateTotalTilesPerAxisAtZoomLevel(zoomLevel);
 
   const normalizedX =

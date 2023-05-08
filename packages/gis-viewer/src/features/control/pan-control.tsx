@@ -1,11 +1,12 @@
-import { memo } from "react";
-import { Coordinate } from "../../types";
+import { type ReactElement, memo } from "react";
+import {
+  RiArrowDownSLine,
+  RiArrowLeftSLine,
+  RiArrowRightSLine,
+  RiArrowUpSLine,
+} from "react-icons/ri";
 import { selectViewState, updateCenterCoordinateByPixel } from "../view/slice";
 import { useGisViewerDispatch, useGisViewerSelector } from "../../slice";
-import { RiArrowLeftSLine } from "react-icons/ri";
-import { RiArrowDownSLine } from "react-icons/ri";
-import { RiArrowRightSLine } from "react-icons/ri";
-import { RiArrowUpSLine } from "react-icons/ri";
 
 const DEFAULT_DELTA_PAN = 100;
 
@@ -16,7 +17,7 @@ interface ButtonControlProps {
 const PanUpButton = memo(function ({ isDisabled }: ButtonControlProps) {
   const dispatch = useGisViewerDispatch();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     dispatch(updateCenterCoordinateByPixel([0, DEFAULT_DELTA_PAN]));
   };
 
@@ -32,10 +33,12 @@ const PanUpButton = memo(function ({ isDisabled }: ButtonControlProps) {
   );
 });
 
+PanUpButton.displayName = "PanUpButton";
+
 const PanLeftButton = memo(function ({ isDisabled }: ButtonControlProps) {
   const dispatch = useGisViewerDispatch();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     dispatch(updateCenterCoordinateByPixel([-DEFAULT_DELTA_PAN, 0]));
   };
 
@@ -51,10 +54,12 @@ const PanLeftButton = memo(function ({ isDisabled }: ButtonControlProps) {
   );
 });
 
+PanLeftButton.displayName = "PanLeftButton";
+
 const PanRightButton = memo(function ({ isDisabled }: ButtonControlProps) {
   const dispatch = useGisViewerDispatch();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     dispatch(updateCenterCoordinateByPixel([DEFAULT_DELTA_PAN, 0]));
   };
 
@@ -70,10 +75,12 @@ const PanRightButton = memo(function ({ isDisabled }: ButtonControlProps) {
   );
 });
 
+PanRightButton.displayName = "PanRightButton";
+
 const PanDownButton = memo(function ({ isDisabled }: ButtonControlProps) {
   const dispatch = useGisViewerDispatch();
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     dispatch(updateCenterCoordinateByPixel([0, -DEFAULT_DELTA_PAN]));
   };
 
@@ -89,22 +96,24 @@ const PanDownButton = memo(function ({ isDisabled }: ButtonControlProps) {
   );
 });
 
-function CenterCoordinateTooltip() {
+PanDownButton.displayName = "PanDownButton";
+
+function CenterCoordinateTooltip(): ReactElement {
   const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate")
+    selectViewState("centerCoordinate"),
   );
 
   return (
     <div className="tooltip-content flex flex-col">
-      <div>{`Center coordinates`}</div>
+      <div>{"Center coordinates"}</div>
       <div>{`x: ${Math.round(centerCoordinate[0])}, y: ${Math.round(
-        centerCoordinate[1]
+        centerCoordinate[1],
       )}`}</div>
     </div>
   );
 }
 
-export function PanControl() {
+export function PanControl(): ReactElement {
   return (
     <div className="tooltip left">
       <div className="control joystick w-12 h-12 grid grid-rows-3 grid-cols-2 rounded-full">

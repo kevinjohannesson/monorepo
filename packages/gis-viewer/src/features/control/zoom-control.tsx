@@ -1,12 +1,12 @@
-import { memo } from "react";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { type ReactElement, memo } from "react";
 import {
   selectViewState,
   selectZoomLevel,
   updateZoomLevelToClosestInteger,
 } from "../view/slice";
 import { useGisViewerDispatch, useGisViewerSelector } from "../../slice";
-import { AiOutlinePlus } from "react-icons/ai";
-import { AiOutlineMinus } from "react-icons/ai";
+
 interface ButtonControlProps {
   isDisabled?: boolean;
 }
@@ -28,6 +28,7 @@ const ZoomInButton = memo(function ({ isDisabled }: ButtonControlProps) {
     </button>
   );
 });
+ZoomInButton.displayName = "ZoomInButton";
 
 const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
   const dispatch = useGisViewerDispatch();
@@ -46,10 +47,11 @@ const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
     </button>
   );
 });
+ZoomOutButton.displayName = "ZoomOutButton";
 
-export function ZoomControl() {
+export function ZoomControl(): ReactElement {
   const [minZoomLevel, maxZoomLevel] = useGisViewerSelector(
-    selectViewState("zoomLevelLimits")
+    selectViewState("zoomLevelLimits"),
   );
 
   const zoomLevel = useGisViewerSelector(selectZoomLevel);

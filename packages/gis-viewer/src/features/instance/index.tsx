@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { type ReactElement, type ReactNode, useEffect } from "react";
 import {
   addGisViewer,
   removeGisViewer,
@@ -7,7 +7,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useMetadataContext } from "../../meta-data";
 
-export function GisViewerInstanceManager() {
+export function GisViewerInstanceManager(): null {
   const { id } = useMetadataContext();
 
   const isAvailable = useSelector(selectGisViewerInstanceIsAvailable(id));
@@ -35,7 +35,9 @@ interface InstanceProps {
   children?: ReactNode;
 }
 
-export function GisViewerInstance({ children = null }: InstanceProps) {
+export function GisViewerInstance({
+  children = null,
+}: InstanceProps): ReactElement {
   const { id } = useMetadataContext();
 
   const isAvailable = useSelector(selectGisViewerInstanceIsAvailable(id));

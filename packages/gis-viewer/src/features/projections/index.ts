@@ -1,4 +1,4 @@
-import { Extent } from "../../types";
+import { type Extent } from "../../types";
 
 export interface Projection {
   name: string;

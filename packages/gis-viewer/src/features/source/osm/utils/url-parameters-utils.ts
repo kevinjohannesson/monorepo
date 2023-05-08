@@ -1,8 +1,8 @@
-import { UrlParameters } from "../types";
+import { type UrlParameters } from "../types";
 import { calculateMaxTileNumberAtZoomLevel } from "./tile-number-utils";
 
 export function isValidUnwrappedUrlParameters(
-  urlParameters: UrlParameters
+  urlParameters: UrlParameters,
 ): boolean {
   const { x, y, z } = urlParameters;
   const maxTileIndex = calculateMaxTileNumberAtZoomLevel(z);
@@ -15,7 +15,7 @@ export function isValidUnwrappedUrlParameters(
 }
 
 export function isValidWrappedUrlParameters(
-  urlParameters: UrlParameters
+  urlParameters: UrlParameters,
 ): boolean {
   const { y, z } = urlParameters;
   const maxTileIndex = calculateMaxTileNumberAtZoomLevel(z);
@@ -29,7 +29,7 @@ export function isValidWrappedUrlParameters(
 
 export function isValidUrlParameters(
   urlParameters: UrlParameters,
-  isWrapped: boolean
+  isWrapped: boolean,
 ): boolean {
   return (
     (isWrapped && isValidWrappedUrlParameters(urlParameters)) ||

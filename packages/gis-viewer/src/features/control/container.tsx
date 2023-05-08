@@ -1,14 +1,4 @@
-import { CSSProperties, ReactNode, forwardRef } from "react";
-
-const controlsContainerStyle: CSSProperties = {
-  position: "absolute",
-  display: "flex",
-  flexDirection: "column",
-  top: 20,
-  left: 20,
-  zIndex: 1,
-  pointerEvents: "none",
-};
+import { type ReactNode, forwardRef } from "react";
 
 export interface ControlsContainerProps {
   children: ReactNode;
@@ -27,3 +17,5 @@ export const ControlsContainer = forwardRef<
     </div>
   );
 });
+
+ControlsContainer.displayName = "ControlsContainer";

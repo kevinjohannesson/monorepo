@@ -1,19 +1,24 @@
-import { addVector2d, assertNotNull } from "utils";
+import { type Coordinate } from "../../../types";
+import { type ReactElement, useEffect } from "react";
+import { type UrlParameters } from "./types";
+import {
+  type Vector2d,
+  addVector2d,
+  assertNotNull,
+  multiplyVector2d,
+} from "utils";
 import {
   calculateFractionalTileNumbers,
   calculateTileNumbers,
   calculateWrappedTileNumberX,
 } from "./utils/tile-number-utils";
-import { isValidUrlParameters } from "./utils/url-parameters-utils";
 import { calculateRenderedTileCenterOffset } from "./utils/rendered-tile-utils";
-import { Coordinate } from "../../../types";
-import { useLayerContext } from "../../layer";
-import { UrlParameters } from "./types";
-import { useEffect } from "react";
-import { useGisViewerSelector } from "../../../slice";
+import { isValidUrlParameters } from "./utils/url-parameters-utils";
 import { selectViewState, selectZoomLevel } from "../../view/slice";
+import { useGisViewerSelector } from "../../../slice";
+import { useLayerContext } from "../../layer";
 
-const tileOffsets = [
+const tileOffsets: Vector2d[] = [
   [0, 0],
   [-1, 0],
   [1, 0],
@@ -27,7 +32,7 @@ const tileOffsets = [
 
 const TILE_SERVER_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-export interface ImageProps {
+export interface TileRendererProps {
   topLeftPixelCoordinate: Coordinate;
   urlParameters: UrlParameters;
   renderedTileSize: number;
@@ -37,7 +42,7 @@ export function TileRenderer({
   topLeftPixelCoordinate,
   urlParameters,
   renderedTileSize,
-}: ImageProps) {
+}: TileRendererProps): null {
   const { ref } = useLayerContext();
 
   useEffect(() => {
@@ -46,36 +51,30 @@ export function TileRenderer({
 
     const image = new Image();
 
-    const handleAsyncEffect = async () => {
-      const tileUrl = TILE_SERVER_URL.replace("{z}", urlParameters.z.toString())
-        .replace("{x}", urlParameters.x.toString())
-        .replace("{y}", urlParameters.y.toString());
+    const tileUrl = TILE_SERVER_URL.replace("{z}", urlParameters.z.toString())
+      .replace("{x}", urlParameters.x.toString())
+      .replace("{y}", urlParameters.y.toString());
 
-      image.onload = function () {
-        const context = canvas.getContext("2d");
-        assertNotNull(context);
+    image.onload = function () {
+      const context = canvas.getContext("2d");
+      assertNotNull(context);
 
-        context.imageSmoothingEnabled = false;
+      context.imageSmoothingEnabled = false;
 
-        context.drawImage(
-          image,
-          topLeftPixelCoordinate[0],
-          topLeftPixelCoordinate[1],
-          renderedTileSize,
-          renderedTileSize
-        );
-      };
-
-      image.src = tileUrl;
+      context.drawImage(
+        image,
+        topLeftPixelCoordinate[0],
+        topLeftPixelCoordinate[1],
+        renderedTileSize,
+        renderedTileSize,
+      );
     };
 
-    handleAsyncEffect();
+    image.src = tileUrl;
 
     return () => {
       const context = canvas.getContext("2d");
       assertNotNull(context);
-
-      // context.clearRect(0, 0, renderedTileSize, renderedTileSize);
 
       image.onload = null;
     };
@@ -84,12 +83,83 @@ export function TileRenderer({
   return null;
 }
 
-export function OsmSource() {
+interface TileClearerProps extends Omit<TileRendererProps, "urlParameters"> {}
+
+function TileClearer({
+  topLeftPixelCoordinate,
+  renderedTileSize,
+}: TileClearerProps): null {
+  const { ref } = useLayerContext();
+
+  useEffect(() => {
+    const canvas = ref.current;
+    assertNotNull(canvas);
+    const context = canvas.getContext("2d");
+    assertNotNull(context);
+
+    context.clearRect(
+      topLeftPixelCoordinate[0],
+      topLeftPixelCoordinate[1],
+      renderedTileSize,
+      renderedTileSize,
+    );
+  });
+
+  return null;
+}
+
+interface ValidTileRendererProps
+  extends Omit<TileRendererProps, "urlParameters">,
+    TileClearerProps {
+  tileNumbers: Coordinate;
+  zoomLevel: number;
+  isWrapped: boolean;
+}
+
+function ValidTileRenderer({
+  tileNumbers: [tileX, tileY],
+  zoomLevel,
+  isWrapped,
+  topLeftPixelCoordinate,
+  renderedTileSize,
+}: ValidTileRendererProps): ReactElement {
+  const x = isWrapped ? calculateWrappedTileNumberX(tileX, zoomLevel) : tileX;
+  const y = tileY;
+
+  const urlParameters: UrlParameters = {
+    z: zoomLevel,
+    x,
+    y,
+  };
+
+  if (isValidUrlParameters(urlParameters, isWrapped)) {
+    return (
+      <TileRenderer
+        topLeftPixelCoordinate={topLeftPixelCoordinate}
+        renderedTileSize={renderedTileSize}
+        urlParameters={urlParameters}
+      />
+    );
+  }
+
+  return (
+    <TileClearer
+      topLeftPixelCoordinate={topLeftPixelCoordinate}
+      renderedTileSize={renderedTileSize}
+    />
+  );
+}
+
+export function OsmSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
   const projection = useGisViewerSelector(selectViewState("projection"));
   const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate")
+    selectViewState("centerCoordinate"),
   );
+  const isWrappedX = useGisViewerSelector(
+    selectViewState("wrapping"),
+  ).isWrappedX;
+
   const zoomLevel = Math.round(useGisViewerSelector(selectZoomLevel));
 
   const renderedTileSize = Math.max(width, height);
@@ -97,13 +167,13 @@ export function OsmSource() {
   const tileNumbers = calculateTileNumbers(
     centerCoordinate,
     projection.code,
-    zoomLevel
+    zoomLevel,
   );
 
   const fractionalTileNumbers = calculateFractionalTileNumbers(
     centerCoordinate,
     projection.code,
-    zoomLevel
+    zoomLevel,
   );
 
   const centered: Coordinate = [
@@ -114,56 +184,26 @@ export function OsmSource() {
   const renderedCenterOffset = calculateRenderedTileCenterOffset(
     renderedTileSize,
     fractionalTileNumbers,
-    tileNumbers
+    tileNumbers,
   );
 
   const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
   return (
     <>
-      {tileOffsets
-        .filter((offset) => {
-          // console.log({
-          //   x: calculateWrappedTileNumberX(
-          //     tileNumbers[0] + offset[0],
-          //     zoomLevel
-          //   ),
-          // });
-          return isValidUrlParameters(
-            {
-              z: zoomLevel,
-              // x: tileNumbers[0] + offset[0],
-              x: calculateWrappedTileNumberX(
-                tileNumbers[0] + offset[0],
-                zoomLevel
-              ),
-              y: tileNumbers[1] + offset[1],
-            },
-            false
-          );
-        })
-        .map((offset) => {
-          // console.log({ x: tileNumbers[0] + offset[0] });
-          return (
-            <TileRenderer
-              key={offset.join(", ")}
-              urlParameters={{
-                z: zoomLevel,
-                // x: tileNumbers[0] + offset[0],
-                x: calculateWrappedTileNumberX(
-                  tileNumbers[0] + offset[0],
-                  zoomLevel
-                ),
-                y: tileNumbers[1] + offset[1],
-              }}
-              topLeftPixelCoordinate={addVector2d(topLeftPixelCoordinate, [
-                offset[0] * renderedTileSize,
-                offset[1] * renderedTileSize,
-              ])}
-              renderedTileSize={renderedTileSize}
-            />
-          );
-        })}
+      {tileOffsets.map((offset) => (
+        <ValidTileRenderer
+          key={offset.join()}
+          tileNumbers={addVector2d(tileNumbers, offset)}
+          zoomLevel={zoomLevel}
+          isWrapped={isWrappedX}
+          renderedTileSize={renderedTileSize}
+          topLeftPixelCoordinate={addVector2d(
+            topLeftPixelCoordinate,
+            multiplyVector2d(offset, renderedTileSize),
+          )}
+        />
+      ))}
     </>
   );
 }

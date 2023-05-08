@@ -1,4 +1,4 @@
-import { CSSProperties, ReactNode, forwardRef } from "react";
+import { type CSSProperties, type ReactNode, forwardRef } from "react";
 
 const mapInfoContainerStyle: CSSProperties = {
   position: "absolute",
@@ -17,10 +17,12 @@ export const MapInfoContainer = forwardRef<
   return (
     <div
       ref={ref}
-      className="map-info-container rounded-tr-lg pl-4 pr-2 py-1 bg-white/[.9] flex gap-2 "
+      className="map-info-container rounded-tr-lg pl-4 pr-2 py-1 bg-white/50 backdrop-blur-md flex gap-2 "
       style={mapInfoContainerStyle}
     >
       {children}
     </div>
   );
 });
+
+MapInfoContainer.displayName = "MapInfoContainer";

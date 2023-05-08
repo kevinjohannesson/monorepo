@@ -1,6 +1,6 @@
-import { Dimensions } from "../../types";
+import { type CSSProperties, type ReactNode, forwardRef } from "react";
 import { DEFAULT_DIMENSIONS } from "./constants";
-import { CSSProperties, ReactNode, forwardRef } from "react";
+import { type Dimensions } from "../../types";
 
 const viewContainerStyle: CSSProperties = {
   outline: "1px solid lightgray",
@@ -26,5 +26,7 @@ export const ViewContainer = forwardRef<HTMLDivElement, ViewContainerProps>(
         {children}
       </div>
     );
-  }
+  },
 );
+
+ViewContainer.displayName = "ViewContainer";

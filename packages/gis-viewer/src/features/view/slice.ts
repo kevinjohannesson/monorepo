@@ -1,24 +1,31 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { DEFAULT_SLICE_PREFIX } from "../../constants";
-import { Coordinate, Dimensions, Limits } from "../../types";
+import { type Coordinate, type Dimensions, type Limits } from "../../types";
 import {
   DEFAULT_CENTER_COORDINATE,
   DEFAULT_DIMENSIONS,
-  DEFAULT_ZOOM_LIMITS,
+  DEFAULT_IS_WRAPPED_X,
+  DEFAULT_IS_WRAPPED_Y,
   DEFAULT_PROJECTION,
+  DEFAULT_ZOOM_LIMITS,
 } from "./constants";
+import { DEFAULT_SLICE_PREFIX } from "../../constants";
+import { type GisViewerState } from "../../slice";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { type Projection } from "../projections";
+import { addVector2d, multiplyVector2d } from "utils";
 import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
-import { Projection } from "../projections";
-import { GisViewerState } from "../../slice";
 import {
   calculateUpdatedZoomLevel,
   calculateZoomLevelFromResolution,
   isZoomLevelWithinLimits,
 } from "./utils/zoom-level-utils";
-import { addVector2d, multiplyVector2d } from "utils";
+
+export interface ViewWrapping {
+  isWrappedX: boolean;
+  isWrappedY: boolean;
+}
 
 export interface ViewState {
   currentResolution: number;
@@ -26,15 +33,16 @@ export interface ViewState {
   dimensions: Dimensions;
   projection: Projection;
   zoomLevelLimits: Limits;
+  wrapping: ViewWrapping;
 }
 
 const initialBaseResolution = calculateBaseResolution(
   DEFAULT_PROJECTION.projectedExtent,
-  DEFAULT_DIMENSIONS
+  DEFAULT_DIMENSIONS,
 );
 const initialCurrentResolution = calculateResolutionFromZoomLevel(
   initialBaseResolution,
-  DEFAULT_ZOOM_LIMITS[0]
+  DEFAULT_ZOOM_LIMITS[0],
 );
 
 const initialState: ViewState = {
@@ -43,6 +51,10 @@ const initialState: ViewState = {
   dimensions: DEFAULT_DIMENSIONS,
   projection: DEFAULT_PROJECTION,
   zoomLevelLimits: DEFAULT_ZOOM_LIMITS,
+  wrapping: {
+    isWrappedX: DEFAULT_IS_WRAPPED_X,
+    isWrappedY: DEFAULT_IS_WRAPPED_Y,
+  },
 };
 
 export const viewSlice = createSlice({
@@ -51,9 +63,18 @@ export const viewSlice = createSlice({
   initialState,
   reducers: {
     updateSlice: (state, { payload }: PayloadAction<Partial<ViewState>>) => {
+      const filteredPayload = Object.entries(payload).reduce<
+        Partial<ViewState>
+      >((acc, [key, value]) => {
+        if (value !== undefined) {
+          (acc as any)[key] = value;
+        }
+        return acc;
+      }, {});
+
       Object.assign(state, {
         ...state,
-        ...payload,
+        ...filteredPayload,
       });
     },
 
@@ -63,7 +84,7 @@ export const viewSlice = createSlice({
 
     updateZoomLevelToClosestInteger: (
       state,
-      { payload: deltaZoom }: PayloadAction<number>
+      { payload: deltaZoom }: PayloadAction<number>,
     ) => {
       const {
         currentResolution,
@@ -74,13 +95,13 @@ export const viewSlice = createSlice({
 
       const baseResolution = calculateBaseResolution(
         projectedExtent,
-        dimensions
+        dimensions,
       );
 
       let updatedZoomLevel = calculateUpdatedZoomLevel(
         baseResolution,
         currentResolution,
-        deltaZoom
+        deltaZoom,
       );
 
       if (deltaZoom < 0) {
@@ -92,7 +113,7 @@ export const viewSlice = createSlice({
       if (isZoomLevelWithinLimits(updatedZoomLevel, zoomLevelLimits)) {
         state.currentResolution = calculateResolutionFromZoomLevel(
           baseResolution,
-          updatedZoomLevel
+          updatedZoomLevel,
         );
       }
     },
@@ -107,19 +128,19 @@ export const viewSlice = createSlice({
 
       const baseResolution = calculateBaseResolution(
         projectedExtent,
-        dimensions
+        dimensions,
       );
 
       const updatedZoomLevel = calculateUpdatedZoomLevel(
         baseResolution,
         currentResolution,
-        deltaZoom
+        deltaZoom,
       );
 
       if (isZoomLevelWithinLimits(updatedZoomLevel, zoomLevelLimits)) {
         state.currentResolution = calculateResolutionFromZoomLevel(
           baseResolution,
-          updatedZoomLevel
+          updatedZoomLevel,
         );
       }
       // else {
@@ -131,7 +152,7 @@ export const viewSlice = createSlice({
 
     updateCenterCoordinateByPixel: (
       state,
-      { payload: deltaPan }: PayloadAction<Coordinate>
+      { payload: deltaPan }: PayloadAction<Coordinate>,
     ) => {
       const { currentResolution } = state;
 
@@ -152,10 +173,10 @@ export const {
 
 export const selectViewState =
   <T extends keyof ViewState>(key: T) =>
-  (state: GisViewerState) =>
+  (state: GisViewerState): ViewState[T] =>
     state[viewSlice.name][key];
 
-export const selectBaseResolution = (state: GisViewerState) => {
+export const selectBaseResolution = (state: GisViewerState): number => {
   const {
     projection: { projectedExtent },
     dimensions,
@@ -164,7 +185,7 @@ export const selectBaseResolution = (state: GisViewerState) => {
   return calculateBaseResolution(projectedExtent, dimensions);
 };
 
-export const selectZoomLevel = (state: GisViewerState) => {
+export const selectZoomLevel = (state: GisViewerState): number => {
   const { currentResolution } = state[viewSlice.name];
 
   const baseResolution = selectBaseResolution(state);

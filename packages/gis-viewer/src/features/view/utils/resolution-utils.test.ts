@@ -1,4 +1,4 @@
-import { Dimensions, Extent } from "../../../types";
+import { type Dimensions, type Extent } from "../../../types";
 import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,

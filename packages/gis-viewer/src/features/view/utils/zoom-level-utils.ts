@@ -1,8 +1,8 @@
-import { Limits } from "../../../types";
+import { type Limits } from "../../../types";
 
 export function calculateZoomLevelFromResolution(
   baseResolution: number,
-  resolution: number
+  resolution: number,
 ): number {
   return Math.log2(baseResolution / resolution);
 }
@@ -10,18 +10,18 @@ export function calculateZoomLevelFromResolution(
 export function calculateUpdatedZoomLevel(
   baseResolution: number,
   currentResolution: number,
-  deltaZoom: number
+  deltaZoom: number,
 ): number {
   const currentZoomLevel = calculateZoomLevelFromResolution(
     baseResolution,
-    currentResolution
+    currentResolution,
   );
   return currentZoomLevel + deltaZoom;
 }
 
 export function isZoomLevelWithinLimits(
   zoomLevel: number,
-  [minZoomLevel, maxZoomLevel]: Limits
+  [minZoomLevel, maxZoomLevel]: Limits,
 ): boolean {
   return zoomLevel >= minZoomLevel && zoomLevel <= maxZoomLevel;
 }

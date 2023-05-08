@@ -1,21 +1,22 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { Provider } from "react-redux";
-import { combineReducers } from "redux";
-import { GisViewerInstance } from "./features/instance";
-import { View } from "./features/view";
-import { MetadataProvider, MetadataProviderProps } from "./meta-data";
-import { slice } from "./slice";
-import { LayersContainer } from "./features/layer/container";
-import { MapInfoContainer } from "./features/map-info/container";
-import { Layer } from "./features/layer";
+import { ControlsContainer } from "./features/control/container";
 import { CrosshairSource } from "./features/source/cross-hair";
 import { CursorCoordinatesMapInfoItem } from "./features/map-info/cursor-coordinates-map-info-item";
+import { GisViewerInstance } from "./features/instance";
+import { Layer } from "./features/layer";
+import { LayersContainer } from "./features/layer/container";
+import { MapInfoContainer } from "./features/map-info/container";
+import { MetadataProvider, type MetadataProviderProps } from "./meta-data";
 import { OsmSource } from "./features/source/osm";
-import { ControlsContainer } from "./features/control/container";
-import { ZoomControl } from "./features/control/zoom-control";
 import { PanControl } from "./features/control/pan-control";
-import { ZoomInteraction } from "./features/interaction/zoom-interaction";
 import { PanInteraction } from "./features/interaction/pan-interaction";
+import { Provider } from "react-redux";
+import { type ReactElement } from "react";
+import { View, type ViewProps } from "./features/view";
+import { ZoomControl } from "./features/control/zoom-control";
+import { ZoomInteraction } from "./features/interaction/zoom-interaction";
+import { combineReducers } from "redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { slice } from "./slice";
 
 const rootReducer = combineReducers({
   gisViewer: slice.reducer,
@@ -25,16 +26,27 @@ export const store = configureStore({
   reducer: rootReducer,
 });
 
-export interface GisViewerProps extends MetadataProviderProps {}
+export interface GisViewerProps
+  extends MetadataProviderProps,
+    Omit<ViewProps, "children"> {
+  children?: never;
+}
 
-export function GisViewer({ id }: GisViewerProps) {
+export function GisViewer({
+  id,
+  initialCenterCoordinate,
+  initialZoomLevel,
+}: GisViewerProps): ReactElement {
   console.log({ id });
 
   return (
     <Provider store={store}>
       <MetadataProvider id={id}>
         <GisViewerInstance>
-          <View>
+          <View
+            initialCenterCoordinate={initialCenterCoordinate}
+            initialZoomLevel={initialZoomLevel}
+          >
             <LayersContainer>
               <Layer>
                 <OsmSource />

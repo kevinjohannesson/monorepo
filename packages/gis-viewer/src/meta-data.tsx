@@ -1,11 +1,11 @@
-import { ReactNode, createContext } from "react";
+import { type ReactElement, type ReactNode, createContext } from "react";
 import { useRequiredContext } from "utils";
 
 export interface MetadataContextValue {
   id: string;
 }
 
-const MetadataContext = createContext({} as MetadataContextValue);
+const MetadataContext = createContext({ id: "Uninitialized" });
 
 export interface MetadataProviderProps {
   /**
@@ -22,7 +22,7 @@ export interface MetadataProviderProps {
 export function MetadataProvider({
   id = "default",
   children = null,
-}: MetadataProviderProps) {
+}: MetadataProviderProps): ReactElement {
   return (
     <MetadataContext.Provider value={{ id }}>
       {children}
@@ -30,6 +30,6 @@ export function MetadataProvider({
   );
 }
 
-export function useMetadataContext() {
+export function useMetadataContext(): MetadataContextValue {
   return useRequiredContext(MetadataContext, "Metadata Context");
 }

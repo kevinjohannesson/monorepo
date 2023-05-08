@@ -1,21 +1,17 @@
-import { ReactNode, useEffect, useRef } from "react";
-import { ViewContainer } from "./container";
-import { Coordinate, Dimensions, Limits } from "../../types";
-import { Projection } from "../projections";
-import {
-  DEFAULT_CENTER_COORDINATE,
-  DEFAULT_DIMENSIONS,
-  DEFAULT_ZOOM_LIMITS,
-} from "./constants";
+import { type Coordinate, type Dimensions, type Limits } from "../../types";
+import { DEFAULT_DIMENSIONS } from "./constants";
 import { EPSG_3857 } from "../projections/epsg3857";
-import { isUndefined } from "lodash";
+import { type Projection } from "../projections";
+import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
+import { ViewContainer } from "./container";
 import { ViewContext } from "./context";
-import { useGisViewerDispatch } from "../../slice";
+import { type ViewWrapping, updateSlice } from "./slice";
 import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
-import { updateSlice } from "./slice";
+import { isUndefined } from "lodash";
+import { useGisViewerDispatch } from "../../slice";
 
 export interface ResolutionProps {
   initialResolution: number;
@@ -27,26 +23,30 @@ export interface ZoomLevelProps {
   initialZoomLevel?: number;
 }
 
-export interface ViewProps {
+export interface ViewPropsBase {
   children?: ReactNode;
   dimensions?: Dimensions;
   initialCenterCoordinate?: Coordinate;
   projection?: Projection;
   zoomLevelLimits?: Limits;
+  wrapping?: ViewWrapping;
 }
+
+export type ViewProps = ViewPropsBase & (ResolutionProps | ZoomLevelProps);
 
 export function View({
   children = null,
   dimensions = DEFAULT_DIMENSIONS,
-  initialCenterCoordinate = DEFAULT_CENTER_COORDINATE,
+  initialCenterCoordinate,
   initialResolution,
   initialZoomLevel,
   projection = EPSG_3857,
-  zoomLevelLimits = DEFAULT_ZOOM_LIMITS,
-}: ViewProps & (ResolutionProps | ZoomLevelProps)) {
+  zoomLevelLimits,
+  wrapping,
+}: ViewProps): ReactElement {
   if (!isUndefined(initialZoomLevel) && !isUndefined(initialResolution)) {
     throw new Error(
-      "Providing both initialZoomLevel and initialResolution is not supported."
+      "Providing both initialZoomLevel and initialResolution is not supported.",
     );
   }
 
@@ -57,12 +57,12 @@ export function View({
   useEffect(() => {
     const baseResolution = calculateBaseResolution(
       projection.projectedExtent,
-      dimensions
+      dimensions,
     );
 
     const currentResolution =
       initialResolution ??
-      calculateResolutionFromZoomLevel(baseResolution, initialZoomLevel || 0);
+      calculateResolutionFromZoomLevel(baseResolution, initialZoomLevel ?? 0);
 
     console.log({ baseResolution });
     console.log({ currentResolution });
@@ -71,8 +71,9 @@ export function View({
         centerCoordinate: initialCenterCoordinate,
         currentResolution,
         dimensions,
+        wrapping,
         zoomLevelLimits,
-      })
+      }),
     );
   }, [
     dimensions,
@@ -81,6 +82,7 @@ export function View({
     initialResolution,
     initialZoomLevel,
     projection,
+    wrapping,
     zoomLevelLimits,
   ]);
 

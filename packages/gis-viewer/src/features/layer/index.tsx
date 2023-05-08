@@ -1,22 +1,25 @@
 import {
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
   createContext,
-  CSSProperties,
-  ReactNode,
-  RefObject,
   useRef,
 } from "react";
-import { useRequiredContext } from "utils";
 import { DEFAULT_IS_VISIBLE, DEFAULT_OPACITY } from "./constants";
-import { useGisViewerSelector } from "../../slice";
 import { selectViewState } from "../view/slice";
+import { useGisViewerSelector } from "../../slice";
+import { useRequiredContext } from "utils";
 
 export interface LayerContextValue {
-  ref: RefObject<HTMLCanvasElement>;
+  ref: RefObject<HTMLCanvasElement | null>;
 }
 
-export const LayerContext = createContext({} as LayerContextValue);
+export const LayerContext = createContext<LayerContextValue>({
+  ref: { current: null },
+});
 
-export const useLayerContext = () =>
+export const useLayerContext = (): LayerContextValue =>
   useRequiredContext(LayerContext, "Layer Context");
 
 const LayerBaseStyle: CSSProperties = {
@@ -35,7 +38,7 @@ export function Layer({
   children,
   opacity = DEFAULT_OPACITY,
   isVisible = DEFAULT_IS_VISIBLE,
-}: LayerProps) {
+}: LayerProps): ReactElement {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));

@@ -6,7 +6,9 @@
   "main": "index.ts",
   "scripts": {
     "test": "jest",
-    "build:css": "postcss style/src/index.scss -o style/dist/index.css"
+    "build:css": "postcss style/src/index.scss -o style/dist/index.css",
+    "prettier": "prettier --write .",
+    "lint": "npx eslint --fix ."
   },
   "bugs": {
     "url": "https://github.com/kevinjohannesson/monorepo/issues"
@@ -30,13 +32,24 @@
     "utils": "*"
   },
   "devDependencies": {
-    "@types/proj4": "^2.5.2",
     "@types/jest": "^29.5.1",
     "@types/lodash": "^3.2.4",
+    "@types/proj4": "^2.5.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-standard-with-typescript": "^34.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.0.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
+    "postcss-nesting": "^11.2.2",
+    "prettier": "^2.8.8",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4",
-    "postcss-nesting": "^11.2.2"
+    "typescript": "^5.0.4"
   }
 }

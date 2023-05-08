@@ -1,4 +1,4 @@
-import { Vector2d } from "utils";
+import { type Vector2d } from "utils";
 
 /** Coordinate vector2d: [x, y] | [longitude, latitude] */
 export type Coordinate = Vector2d;
