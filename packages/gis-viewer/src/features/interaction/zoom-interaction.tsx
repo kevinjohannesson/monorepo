@@ -1,4 +1,5 @@
 import { isNull } from "utils";
+import { isTouchPadScroll } from "./utils";
 import { updateZoomLevel } from "../view/slice";
 import { useEffect } from "react";
 import { useGisViewerDispatch } from "../../slice";
@@ -16,7 +17,8 @@ export function ZoomInteraction(): null {
     const handleWheel = (event: globalThis.WheelEvent): void => {
       event.preventDefault();
 
-      dispatch(updateZoomLevel(event.deltaY < 0 ? -1 : 1));
+      const delta = isTouchPadScroll(event) ? 0.1 : 0.5;
+      dispatch(updateZoomLevel(event.deltaY < 0 ? -delta : delta));
 
       event.stopPropagation();
     };

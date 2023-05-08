@@ -150,8 +150,6 @@ const tileOffsets: Vector2d[] = [
   [1, -1],
 ];
 
-const epsilon = 1e-6;
-
 export function OsmSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
   const projection = useGisViewerSelector(selectViewState("projection"));
@@ -162,24 +160,20 @@ export function OsmSource(): ReactElement {
     selectViewState("wrapping"),
   ).isWrappedX;
 
-  const zoomLevel = useGisViewerSelector(selectZoomLevel);
-  const integerZoomLevel = Math.floor(zoomLevel + epsilon);
-  const fractionalZoom = zoomLevel - integerZoomLevel;
+  const zoomLevel = Math.round(useGisViewerSelector(selectZoomLevel));
 
-  const scale = 1 + fractionalZoom;
-
-  const renderedTileSize = Math.max(width, height) * scale;
+  const renderedTileSize = Math.max(width, height);
 
   const tileNumbers = calculateTileNumbers(
     centerCoordinate,
     projection.code,
-    integerZoomLevel,
+    zoomLevel,
   );
 
   const fractionalTileNumbers = calculateFractionalTileNumbers(
     centerCoordinate,
     projection.code,
-    integerZoomLevel,
+    zoomLevel,
   );
 
   const centered: Coordinate = [
@@ -201,7 +195,7 @@ export function OsmSource(): ReactElement {
         <ValidTileRenderer
           key={offset.join()}
           tileNumbers={addVector2d(tileNumbers, offset)}
-          zoomLevel={integerZoomLevel}
+          zoomLevel={zoomLevel}
           isWrapped={isWrappedX}
           renderedTileSize={renderedTileSize}
           topLeftPixelCoordinate={addVector2d(

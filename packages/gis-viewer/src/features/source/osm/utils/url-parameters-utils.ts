@@ -26,7 +26,8 @@ export function isValidWrappedUrlParameters(
 
   return true;
 }
-
+// Ik denk dat hier geen "is wrapped" check meer nodig is, als de functie wordt aangeroepen
+// met parameters die al (optioneel) wrapped zijn. In dat geval checken we gewoon enkel de normale check
 export function isValidUrlParameters(
   urlParameters: UrlParameters,
   isWrapped: boolean,
