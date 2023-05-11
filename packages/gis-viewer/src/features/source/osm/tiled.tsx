@@ -250,7 +250,7 @@ const tileOffsets: Vector2d[] = [
 
 const epsilon = 1e-6;
 
-export function OsmSource(): ReactElement {
+export function OsmTiledSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
   const projection = useGisViewerSelector(selectViewState("projection"));
   const centerCoordinate = useGisViewerSelector(

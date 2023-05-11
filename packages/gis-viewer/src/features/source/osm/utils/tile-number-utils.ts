@@ -1,6 +1,56 @@
-import { type Coordinate } from "../../../../types";
+import { type Coordinate, type Dimensions } from "../../../../types";
 import { deg2rad } from "utils";
 import proj4 from "proj4";
+
+const TILE_SIZE = 256;
+
+function calculateNextPowerOf2(x: number): number {
+  // https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
+  return 1 << Math.ceil(Math.log2(x));
+}
+
+function calculatePreviousPowerOf2(x: number): number {
+  return 1 << Math.floor(Math.log2(x));
+}
+
+export function calculateOsmZoomBaseLevel([width, height]: Dimensions): number {
+  const viewSize = Math.max(width, height);
+  const totalTilesOnAxis = viewSize / TILE_SIZE;
+  const totalTilesOnOsm = calculateNextPowerOf2(Math.ceil(totalTilesOnAxis));
+  const osmZoomLevel = Math.log2(totalTilesOnOsm);
+  return osmZoomLevel;
+}
+
+export function calculateOsmZoomBaseLevel2([
+  width,
+  height,
+]: Dimensions): number {
+  const viewSize = Math.max(width, height);
+  const totalTilesOnAxis = viewSize / TILE_SIZE;
+
+  const nextTotalTilesOnOsm = calculateNextPowerOf2(
+    Math.ceil(totalTilesOnAxis),
+  );
+  const prevTotalTilesOnOsm = calculatePreviousPowerOf2(
+    Math.ceil(totalTilesOnAxis),
+  );
+
+  const nextScalingFactor = (nextTotalTilesOnOsm * TILE_SIZE) / viewSize;
+  const prevScalingFactor = (prevTotalTilesOnOsm * TILE_SIZE) / viewSize;
+
+  const closestScalingFactor =
+    Math.abs(1 - nextScalingFactor) <= Math.abs(1 - prevScalingFactor)
+      ? nextScalingFactor
+      : prevScalingFactor;
+
+  const totalTilesOnOsm =
+    closestScalingFactor === nextScalingFactor
+      ? nextTotalTilesOnOsm
+      : prevTotalTilesOnOsm;
+
+  const osmZoomLevel = Math.log2(totalTilesOnOsm);
+  return osmZoomLevel;
+}
 
 export function calculateTotalTilesPerAxisAtZoomLevel(
   zoomLevel: number,
