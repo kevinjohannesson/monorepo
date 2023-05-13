@@ -1,4 +1,5 @@
 export { useRequiredContext } from "./src/use-required-context";
+export { createSpiralPattern } from "./src/pattern";
 export { assertNotNull, isNull, isNotNull } from "./src/assert";
 export { deg2rad, rad2deg } from "./src/convert";
 export {

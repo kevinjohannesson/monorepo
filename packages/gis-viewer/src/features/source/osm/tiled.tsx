@@ -1,4 +1,4 @@
-import { type Coordinate } from "../../../types";
+import { type Coordinate, type Dimensions } from "../../../types";
 import { type ReactElement, useEffect, useMemo } from "react";
 import {
   TILE_SIZE,
@@ -13,6 +13,7 @@ import {
   type Vector2d,
   addVector2d,
   assertNotNull,
+  createSpiralPattern,
   multiplyVector2d,
 } from "utils";
 import { calculateRenderedTileCenterOffset } from "./utils/rendered-tile-utils";
@@ -28,12 +29,85 @@ export interface TileRendererProps {
   topLeftPixelCoordinate: Coordinate;
   urlParameters: UrlParameters;
   renderedTileSize: number;
+  offset: Vector2d;
 }
+
+export function renderGridTileIndices(
+  canvas: HTMLCanvasElement,
+  indices: Coordinate,
+  topLeftPixelCoordinate: Coordinate,
+  tileDimensions: Dimensions,
+): void {
+  const context = canvas.getContext("2d");
+  assertNotNull(context);
+
+  context.font = "24px Arial";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  context.fillText(
+    `x: ${indices[0]}, y: ${indices[1]}`,
+    topLeftPixelCoordinate[0] + tileDimensions[0] / 2,
+    topLeftPixelCoordinate[1] + tileDimensions[1] / 2,
+  );
+}
+
+export function renderGridTile(
+  canvas: HTMLCanvasElement,
+  topLeftPixelCoordinate: Coordinate,
+  tileDimensions: Dimensions,
+): void {
+  const context = canvas.getContext("2d");
+  assertNotNull(context);
+
+  context.beginPath();
+  context.rect(
+    topLeftPixelCoordinate[0],
+    topLeftPixelCoordinate[1],
+    tileDimensions[0],
+    tileDimensions[1],
+  );
+  context.lineWidth = 1;
+  context.strokeStyle = "#737373";
+  context.stroke();
+}
+
+// function TileCoordinateRenderer({
+//   topLeftPixelCoordinate,
+//   coordinates,
+//   renderedTileSize,
+// }: any): null {
+//   const { ref } = useLayerContext();
+
+//   useEffect(() => {
+//     const canvas = ref.current;
+//     assertNotNull(canvas);
+//     const context = canvas.getContext("2d");
+//     assertNotNull(context);
+
+//     context.beginPath();
+//     context.rect(
+//       topLeftPixelCoordinate[0],
+//       topLeftPixelCoordinate[1],
+//       renderedTileSize,
+//       renderedTileSize,
+//     );
+//     context.stroke();
+
+//     renderGridTileIndices(canvas, coordinates, topLeftPixelCoordinate, [
+//       renderedTileSize,
+//       renderedTileSize,
+//     ]);
+//   }, [ref, coordinates, topLeftPixelCoordinate, renderedTileSize]);
+
+//   return null;
+// }
 
 export function TileRenderer({
   topLeftPixelCoordinate,
   urlParameters,
   renderedTileSize,
+  offset,
 }: TileRendererProps): null {
   const { ref } = useLayerContext();
   const { getCache, setCache } = useImageTileCacheContext();
@@ -64,6 +138,14 @@ export function TileRenderer({
         renderedTileSize,
         renderedTileSize,
       );
+      renderGridTile(canvas, topLeftPixelCoordinate, [
+        renderedTileSize,
+        renderedTileSize,
+      ]);
+      renderGridTileIndices(canvas, offset, topLeftPixelCoordinate, [
+        renderedTileSize,
+        renderedTileSize,
+      ]);
     } else {
       context.clearRect(
         topLeftPixelCoordinate[0],
@@ -81,6 +163,14 @@ export function TileRenderer({
           renderedTileSize,
           renderedTileSize,
         );
+        renderGridTile(canvas, topLeftPixelCoordinate, [
+          renderedTileSize,
+          renderedTileSize,
+        ]);
+        renderGridTileIndices(canvas, offset, topLeftPixelCoordinate, [
+          renderedTileSize,
+          renderedTileSize,
+        ]);
       };
 
       image.src = tileUrl;
@@ -101,6 +191,7 @@ interface TileClearerProps extends Omit<TileRendererProps, "urlParameters"> {}
 function TileClearer({
   topLeftPixelCoordinate,
   renderedTileSize,
+  offset,
 }: TileClearerProps): null {
   const { ref } = useLayerContext();
 
@@ -116,6 +207,14 @@ function TileClearer({
       renderedTileSize,
       renderedTileSize,
     );
+    renderGridTile(canvas, topLeftPixelCoordinate, [
+      renderedTileSize,
+      renderedTileSize,
+    ]);
+    renderGridTileIndices(canvas, offset, topLeftPixelCoordinate, [
+      renderedTileSize,
+      renderedTileSize,
+    ]);
   });
 
   return null;
@@ -127,6 +226,7 @@ interface ValidTileRendererProps
   tileNumbers: Coordinate;
   zoomLevel: number;
   isWrapped: boolean;
+  offset: Vector2d;
 }
 
 function ValidTileRenderer({
@@ -135,6 +235,7 @@ function ValidTileRenderer({
   isWrapped,
   topLeftPixelCoordinate,
   renderedTileSize,
+  offset,
 }: ValidTileRendererProps): ReactElement {
   const x = isWrapped ? calculateWrappedTileNumberX(tileX, zoomLevel) : tileX;
   const y = tileY;
@@ -151,6 +252,7 @@ function ValidTileRenderer({
         topLeftPixelCoordinate={topLeftPixelCoordinate}
         renderedTileSize={renderedTileSize}
         urlParameters={urlParameters}
+        offset={offset}
       />
     );
   }
@@ -159,6 +261,7 @@ function ValidTileRenderer({
     <TileClearer
       topLeftPixelCoordinate={topLeftPixelCoordinate}
       renderedTileSize={renderedTileSize}
+      offset={offset}
     />
   );
 }
@@ -186,7 +289,7 @@ function getOsmBaseLevelAndRenderedTileSize(
   return { integerZoomLevel, renderedTileSize };
 }
 
-// function getOffsets(width: number, height: number): Vector2d[] {
+// function getOffsetsOld(width: number, height: number): Vector2d[] {
 //   const offsetX = Math.ceil(width / 2 / TILE_SIZE);
 //   const offsetY = Math.ceil(height / 2 / TILE_SIZE);
 //   const offsets: Vector2d[] = [];
@@ -198,44 +301,44 @@ function getOsmBaseLevelAndRenderedTileSize(
 //   return offsets;
 // }
 
-// generate the offsets in a spiral like array:
-function getOffsets(width: number, height: number): Vector2d[] {
-  const offsetX = Math.ceil(width / 2 / TILE_SIZE);
-  const offsetY = Math.ceil(height / 2 / TILE_SIZE);
+// // generate the offsets in a spiral like array:
+// function getOffsets(width: number, height: number): Vector2d[] {
+//   const offsetX = Math.ceil(width / 2 / TILE_SIZE);
+//   const offsetY = Math.ceil(height / 2 / TILE_SIZE);
 
-  const offsets: Vector2d[] = [];
-  let x = 0;
-  let y = 0;
-  let dx = 0;
-  let dy = -1;
+//   const offsets: Vector2d[] = [];
+//   let x = 0;
+//   let y = 0;
+//   let dx = 0;
+//   let dy = -1;
 
-  for (let i = 0; i < Math.max(offsetX, offsetY) ** 2; i++) {
-    if (-offsetX <= x && x <= offsetX && -offsetY <= y && y <= offsetY) {
-      offsets.push([x, y]);
-    }
+//   for (let i = 0; i < Math.max(offsetX, offsetY) ** 2; i++) {
+//     if (-offsetX <= x && x <= offsetX && -offsetY <= y && y <= offsetY) {
+//       offsets.push([x, y]);
+//     }
 
-    if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
-      // Change direction
-      [dx, dy] = [-dy, dx];
-    }
+//     if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
+//       // Change direction
+//       [dx, dy] = [-dy, dx];
+//     }
 
-    x += dx;
-    y += dy;
-  }
+//     x += dx;
+//     y += dy;
+//   }
 
-  // For the case where the view width and height are not equal,
-  // we might have missed some offsets. Fill them in a brute force way.
-  for (let xx = -offsetX; xx <= offsetX; xx++) {
-    for (let yy = -offsetY; yy <= offsetY; yy++) {
-      const exists = offsets.some(([x, y]) => x === xx && y === yy);
-      if (!exists) {
-        offsets.push([xx, yy]);
-      }
-    }
-  }
+//   // For the case where the view width and height are not equal,
+//   // we might have missed some offsets. Fill them in a brute force way.
+//   for (let xx = -offsetX; xx <= offsetX; xx++) {
+//     for (let yy = -offsetY; yy <= offsetY; yy++) {
+//       const exists = offsets.some(([x, y]) => x === xx && y === yy);
+//       if (!exists) {
+//         offsets.push([xx, yy]);
+//       }
+//     }
+//   }
 
-  return offsets;
-}
+//   return offsets;
+// }
 
 export function OsmTiledSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
@@ -283,11 +386,52 @@ export function OsmTiledSource(): ReactElement {
   );
   const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
-  const offsets = useMemo(() => getOffsets(width, height), [width, height]);
+  // const offsets = useMemo(() => getOffsets(width, height), [width, height]);
+  // console.log(offsets);
+  // const offsetX = Math.ceil(width / TILE_SIZE);
+  // const offsetY = Math.ceil(height / TILE_SIZE);
+  // console.log(createSpiralPattern(offsetX, offsetY));
+  // console.log(width);
+  // console.log(Math.ceil(width / 2 / TILE_SIZE));
+  // console.log(Math.ceil(width / 2 / TILE_SIZE));
+  // console.log(Math.ceil(width / 2 / TILE_SIZE));
+  // console.log(width);
+  // console.log(width / TILE_SIZE);
+  // console.log(width / 2 / TILE_SIZE);
+  // console.log(Math.ceil(width / 2 / TILE_SIZE));
+  // console.log(1 + Math.ceil(width / 2 / TILE_SIZE));
+  // console.log(1 + Math.ceil(width / 2 / TILE_SIZE) * 2);
 
+  const offsets2 = useMemo(
+    () =>
+      createSpiralPattern(
+        1 + Math.ceil(width / 2 / TILE_SIZE) * 2,
+        1 + Math.ceil(height / 2 / TILE_SIZE) * 2,
+      ),
+    [width, height],
+  );
+  // console.log(offsetX, offsetY);
+  // console.log(createSpiralMatrix(2, 2));
+  // console.log(createSpiralMatrix(2, 2));
+  // console.log(createSpiralMatrix(3, 3));
+  // console.log(createSpiralMatrix(4, 4));
+  // const w = 4;
+  // const h = 2;
+
+  // console.log(
+  //   createSpiralMatrix(w, h).filter(
+  //     ([x, y]) => y <= Math.floor(h / 2) && y >= Math.floor(-h / 2),
+  //   ),
+  // );
+  // console.log(createSpiralMatrix(4, 4));
+
+  // console.log(getOffsets(600, 600));
+  // console.log(getOffsetsOld(600, 600));
+
+  // console.log(createSpiralMatrix(4, 2));
   return (
     <>
-      {offsets.map((offset) => (
+      {offsets2.map((offset) => (
         <ValidTileRenderer
           key={offset.join()}
           tileNumbers={addVector2d(tileNumbers, offset)}
@@ -298,6 +442,7 @@ export function OsmTiledSource(): ReactElement {
             topLeftPixelCoordinate,
             multiplyVector2d(offset, renderedTileSize),
           )}
+          offset={offset}
         />
       ))}
     </>
