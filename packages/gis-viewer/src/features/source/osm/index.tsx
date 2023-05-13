@@ -218,7 +218,7 @@ function ValidTileRenderer({
     y,
   };
 
-  if (isValidUrlParameters(urlParameters, isWrapped)) {
+  if (isValidUrlParameters(urlParameters)) {
     return (
       <TileRenderer
         topLeftPixelCoordinate={topLeftPixelCoordinate}
@@ -325,6 +325,7 @@ export function OsmSource(): ReactElement {
 
   const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
+  console.log({ topLeftPixelCoordinate });
   return (
     <>
       {tileOffsets.map((offset) => (

@@ -1,4 +1,4 @@
-import { type Coordinate } from "../../../types";
+import { type Coordinate } from "../../types";
 import { MdOutlineMouse } from "react-icons/md";
 import { type ReactElement, useEffect, useRef, useState } from "react";
 import {
@@ -9,9 +9,9 @@ import {
   multiplyVector2d,
   subtractVector2d,
 } from "utils";
-import { selectViewState } from "../../view/slice";
-import { useGisViewerSelector } from "../../../slice";
-import { useViewContext } from "../../view/context";
+import { selectViewState } from "../view/slice";
+import { useGisViewerSelector } from "../../slice";
+import { useViewContext } from "../view/context";
 
 export function CursorCoordinatesMapInfoItem({
   placeholderText = "Cursor is out of view",

@@ -7,7 +7,6 @@ import {
   DEFAULT_PROJECTION,
   DEFAULT_ZOOM_LIMITS,
 } from "./constants";
-import { DEFAULT_SLICE_PREFIX } from "../../constants";
 import { type GisViewerState } from "../../slice";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { type Projection } from "../projections";
@@ -58,7 +57,7 @@ const initialState: ViewState = {
 };
 
 export const viewSlice = createSlice({
-  name: `${DEFAULT_SLICE_PREFIX}/view`,
+  name: `view`,
   // name: "view",
   initialState,
   reducers: {
@@ -143,11 +142,6 @@ export const viewSlice = createSlice({
           updatedZoomLevel,
         );
       }
-      // else {
-      //   console.warn(
-      //     "A caller is trying to update the zoom level to a zoom level that is outside the bounds set by `minZoom` and `maxZoom`. This is not allowed."
-      //   );
-      // }
     },
 
     updateCenterCoordinateByPixel: (
@@ -158,7 +152,31 @@ export const viewSlice = createSlice({
 
       const offset = multiplyVector2d(currentResolution, deltaPan);
 
-      state.centerCoordinate = addVector2d(state.centerCoordinate, offset);
+      const newCenter = addVector2d(state.centerCoordinate, offset);
+
+      const [minX, minY, maxX, maxY] = state.projection.projectedExtent;
+
+      if (!state.wrapping.isWrappedX) {
+        newCenter[0] = Math.max(minX, Math.min(maxX, newCenter[0]));
+      } else {
+        if (newCenter[0] > maxX) {
+          newCenter[0] = minX + (newCenter[0] - maxX);
+        } else if (newCenter[0] < minX) {
+          newCenter[0] = maxX - (minX - newCenter[0]);
+        }
+      }
+
+      if (!state.wrapping.isWrappedY) {
+        newCenter[1] = Math.max(minY, Math.min(maxY, newCenter[1]));
+      } else {
+        if (newCenter[1] > maxY) {
+          newCenter[1] = minY + (newCenter[1] - maxY);
+        } else if (newCenter[1] < minY) {
+          newCenter[1] = maxY - (minY - newCenter[1]);
+        }
+      }
+
+      state.centerCoordinate = newCenter;
     },
   },
 });

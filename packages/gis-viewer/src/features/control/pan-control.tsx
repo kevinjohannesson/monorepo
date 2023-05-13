@@ -24,7 +24,7 @@ const PanUpButton = memo(function ({ isDisabled }: ButtonControlProps) {
   return (
     <button
       type="button"
-      className="col-span-2 flex items-center justify-center"
+      className="col-span-2 flex items-center justify-center shadow-none"
       disabled={isDisabled}
       onClick={handleClick}
     >
@@ -45,7 +45,7 @@ const PanLeftButton = memo(function ({ isDisabled }: ButtonControlProps) {
   return (
     <button
       type="button"
-      className="flex items-center justify-start"
+      className="flex items-center justify-start shadow-none"
       disabled={isDisabled}
       onClick={handleClick}
     >
@@ -66,7 +66,7 @@ const PanRightButton = memo(function ({ isDisabled }: ButtonControlProps) {
   return (
     <button
       type="button"
-      className="flex items-center justify-end"
+      className="flex items-center justify-end shadow-none"
       disabled={isDisabled}
       onClick={handleClick}
     >
@@ -87,7 +87,7 @@ const PanDownButton = memo(function ({ isDisabled }: ButtonControlProps) {
   return (
     <button
       type="button"
-      className="col-span-2 flex items-center justify-center"
+      className="col-span-2 flex items-center justify-center shadow-none"
       disabled={isDisabled}
       onClick={handleClick}
     >

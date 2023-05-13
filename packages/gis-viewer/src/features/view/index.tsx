@@ -88,7 +88,9 @@ export function View({
 
   return (
     <ViewContext.Provider value={{ ref }}>
-      <ViewContainer ref={ref}>{children}</ViewContainer>
+      <ViewContainer ref={ref} dimensions={dimensions}>
+        {children}
+      </ViewContainer>
     </ViewContext.Provider>
   );
 }

@@ -47,7 +47,7 @@ const INIT_INSTANCE_ACTION_TYPE = "@@custom-init";
 export function createReduxInstance<N extends string, S>(
   name: N,
   instanceReducer: Reducer<S, AnyAction>,
-  actionMatcherPrefix: string,
+  // actionMatcherPrefix: string,
   instances?: Instances<S>
 ) {
   const slice = createSlice({
@@ -70,9 +70,10 @@ export function createReduxInstance<N extends string, S>(
     },
     extraReducers: (builder) => {
       builder.addMatcher(
-        (action) => action.type.startsWith(`${actionMatcherPrefix}/`),
+        // (action) => action.type.startsWith(`${actionMatcherPrefix}/`),
+        (action) => typeof action?.meta?.redux_instance_id === "string",
         (state, action) => {
-          const id = action.meta.id;
+          const id = action.meta.redux_instance_id;
           state.instances[prefixIdWithName(name, id)] = instanceReducer(
             state.instances[prefixIdWithName(name, id)] as S,
             action
@@ -174,7 +175,8 @@ const {
   selectors: { selectMapprInstance, selectMapprInstanceIsAvailable },
   actions: { addMappr, removeMappr },
   hooks: { useMapprInstanceDispatchFactory, useMapprInstanceSelectorFactory },
-} = createReduxInstance("mappr", testInstanceReducer, "mapprInstance");
+} = createReduxInstance("mappr", testInstanceReducer);
+// } = createReduxInstance("mappr", testInstanceReducer, "mapprInstance");
 
 const useFoo = () => {
   const foo1 = useMapprInstanceSelectorFactory("default")(selectZoomLevel);

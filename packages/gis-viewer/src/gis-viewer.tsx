@@ -87,6 +87,9 @@ export function GisViewerResult({
   initialCenterCoordinate,
   initialZoomLevel,
   children,
+  dimensions,
+  zoomLevelLimits,
+  wrapping,
 }: GisViewerProps2): ReactElement {
   console.log({ id });
 
@@ -97,6 +100,9 @@ export function GisViewerResult({
           <View
             initialCenterCoordinate={initialCenterCoordinate}
             initialZoomLevel={initialZoomLevel}
+            dimensions={dimensions}
+            zoomLevelLimits={zoomLevelLimits}
+            wrapping={wrapping}
           >
             {children}
             {/* Ik weet niet of ik dit er standaard in wil */}

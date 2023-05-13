@@ -10,6 +10,7 @@ import { ErrorView } from "./error-view";
 import { GisViewerOsmSingleTileView } from "./experiments/gis-viewer-osm-single-tile-view";
 import { GisViewerTiledView } from "./experiments/gis-viewer-osm-tiled-view";
 import { GisViewerOsmSingleVsTiledView } from "./experiments/gis-viewer-osm-single-vs-tiled-view";
+import { GisViewerLargeScreenView } from "./experiments/gis-viewer-large-screen";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "experiments/osm-single-vs-tiled",
         element: <GisViewerOsmSingleVsTiledView />,
+      },
+      {
+        path: "experiments/osm-large-screen",
+        element: <GisViewerLargeScreenView />,
       },
     ],
   },

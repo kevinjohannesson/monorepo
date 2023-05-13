@@ -28,7 +28,7 @@ export const {
 } = createReduxInstance(
   GIS_VIEWER_NAME,
   gisViewerReducer,
-  DEFAULT_SLICE_PREFIX,
+  // DEFAULT_SLICE_PREFIX,
 );
 
 export const useGisViewerDispatch: UseSliceInstanceDispatch = () => {

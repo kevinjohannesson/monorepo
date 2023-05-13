@@ -120,7 +120,7 @@ function ValidTileRenderer({
     y,
   };
 
-  if (isValidUrlParameters(urlParameters, isWrapped)) {
+  if (isValidUrlParameters(urlParameters)) {
     return (
       <TileRenderer
         topLeftPixelCoordinate={topLeftPixelCoordinate}

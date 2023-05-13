@@ -1,5 +1,13 @@
 import { type Coordinate } from "../../../types";
-import { type ReactElement, useEffect, useRef } from "react";
+import { type ReactElement, useEffect, useMemo } from "react";
+import {
+  TILE_SIZE,
+  calculateFractionalTileNumbers,
+  calculateOsmZoomBaseLevel2,
+  calculateTileNumbers,
+  calculateTotalTilesPerAxisAtZoomLevel,
+  calculateWrappedTileNumberX,
+} from "./utils/tile-number-utils";
 import { type UrlParameters } from "./types";
 import {
   type Vector2d,
@@ -7,14 +15,6 @@ import {
   assertNotNull,
   multiplyVector2d,
 } from "utils";
-import {
-  calculateFractionalTileNumbers,
-  calculateOsmZoomBaseLevel,
-  calculateOsmZoomBaseLevel2,
-  calculateTileNumbers,
-  calculateTotalTilesPerAxisAtZoomLevel,
-  calculateWrappedTileNumberX,
-} from "./utils/tile-number-utils";
 import { calculateRenderedTileCenterOffset } from "./utils/rendered-tile-utils";
 import { isValidUrlParameters } from "./utils/url-parameters-utils";
 import { selectViewState, selectZoomLevel } from "../../view/slice";
@@ -23,46 +23,6 @@ import { useImageTileCacheContext } from "../../cache";
 import { useLayerContext } from "../../layer";
 
 const TILE_SERVER_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-
-const loadAndCacheTileImage = async (
-  urlParameters: UrlParameters,
-  getCache: (
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => HTMLImageElement | null,
-  setCache: (
-    image: HTMLImageElement,
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => void,
-): Promise<HTMLImageElement> => {
-  return await new Promise<HTMLImageElement>((resolve) => {
-    const cachedImage = getCache(
-      urlParameters.z,
-      urlParameters.x,
-      urlParameters.y,
-    );
-
-    if (cachedImage != null) {
-      resolve(cachedImage);
-    } else {
-      const tileUrl = TILE_SERVER_URL.replace("{z}", urlParameters.z.toString())
-        .replace("{x}", urlParameters.x.toString())
-        .replace("{y}", urlParameters.y.toString());
-
-      const tileImage = new Image();
-
-      tileImage.onload = function () {
-        setCache(tileImage, urlParameters.z, urlParameters.x, urlParameters.y);
-        resolve(tileImage);
-      };
-
-      tileImage.src = tileUrl;
-    }
-  });
-};
 
 export interface TileRendererProps {
   topLeftPixelCoordinate: Coordinate;
@@ -77,7 +37,7 @@ export function TileRenderer({
 }: TileRendererProps): null {
   const { ref } = useLayerContext();
   const { getCache, setCache } = useImageTileCacheContext();
-  // const imageRef = useRef<HTMLImageElement>(new Image());
+
   useEffect(() => {
     const canvas = ref.current;
     assertNotNull(canvas);
@@ -94,15 +54,10 @@ export function TileRenderer({
       .replace("{x}", urlParameters.x.toString())
       .replace("{y}", urlParameters.y.toString());
 
-    // const handleAsync = async (): Promise<void> => {
     const image = new Image();
 
     if (cachedImage != null) {
-      // console.log("drawing image from cache");
-      // console.table({ urlParameters });
-      // console.table({ topLeftPixelCoordinate });
       context.drawImage(
-        // imageRef.current,
         cachedImage,
         topLeftPixelCoordinate[0],
         topLeftPixelCoordinate[1],
@@ -110,15 +65,16 @@ export function TileRenderer({
         renderedTileSize,
       );
     } else {
+      context.clearRect(
+        topLeftPixelCoordinate[0],
+        topLeftPixelCoordinate[1],
+        renderedTileSize,
+        renderedTileSize,
+      );
       image.onload = function () {
         setCache(image, urlParameters.z, urlParameters.x, urlParameters.y);
 
-        // context.imageSmoothingEnabled = false;
-        // console.table({ urlParameters });
-        // console.table({ topLeftPixelCoordinate });
-
         context.drawImage(
-          // imageRef.current,
           image,
           topLeftPixelCoordinate[0],
           topLeftPixelCoordinate[1],
@@ -130,39 +86,10 @@ export function TileRenderer({
       image.src = tileUrl;
     }
 
-    // const tileUrl = TILE_SERVER_URL.replace("{z}", urlParameters.z.toString())
-    //   .replace("{x}", urlParameters.x.toString())
-    //   .replace("{y}", urlParameters.y.toString());
-    // image.onload = function () {
-    //   // imageRef.current =  loadAndCacheTileImage(
-    //   //   urlParameters,
-    //   //   getCache,
-    //   //   setCache,
-    //   // ).then(
-
-    //   // );
-    //   const context = canvas.getContext("2d");
-    //   assertNotNull(context);
-
-    //   // context.imageSmoothingEnabled = false;
-    //   console.log({ urlParameters });
-    //   context.drawImage(
-    //     // imageRef.current,
-    //     image,
-    //     topLeftPixelCoordinate[0],
-    //     topLeftPixelCoordinate[1],
-    //     renderedTileSize,
-    //     renderedTileSize,
-    //   );
-    //   // };
-    // };
-
-    // handleAsync();
     image.src = tileUrl;
 
     return () => {
       image.onload = null;
-      // imageRef.current.onload = null;
     };
   }, [ref, urlParameters, topLeftPixelCoordinate, renderedTileSize]);
 
@@ -218,7 +145,7 @@ function ValidTileRenderer({
     y,
   };
 
-  if (isValidUrlParameters(urlParameters, isWrapped)) {
+  if (isValidUrlParameters(urlParameters)) {
     return (
       <TileRenderer
         topLeftPixelCoordinate={topLeftPixelCoordinate}
@@ -236,19 +163,79 @@ function ValidTileRenderer({
   );
 }
 
-const tileOffsets: Vector2d[] = [
-  [0, 0],
-  [-1, 0],
-  [1, 0],
-  [0, -1],
-  [0, 1],
-  [-1, -1],
-  [1, 1],
-  [-1, 1],
-  [1, -1],
-];
-
 const epsilon = 1e-6;
+
+// Helper functions
+function getOsmBaseLevelAndRenderedTileSize(
+  width: number,
+  height: number,
+  zoomLevel: number,
+): {
+  integerZoomLevel: number;
+  renderedTileSize: number;
+} {
+  const initialIntegerZoomLevel = Math.floor(zoomLevel + epsilon);
+  const fractionalZoom = zoomLevel - initialIntegerZoomLevel;
+  const scale = 1 + fractionalZoom;
+  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2([width, height]);
+  const integerZoomLevel = initialIntegerZoomLevel + osmBaseZoomLevel;
+  const n =
+    (calculateTotalTilesPerAxisAtZoomLevel(osmBaseZoomLevel) * TILE_SIZE) /
+    Math.max(width, height);
+  const renderedTileSize = (TILE_SIZE / n) * scale;
+  return { integerZoomLevel, renderedTileSize };
+}
+
+// function getOffsets(width: number, height: number): Vector2d[] {
+//   const offsetX = Math.ceil(width / 2 / TILE_SIZE);
+//   const offsetY = Math.ceil(height / 2 / TILE_SIZE);
+//   const offsets: Vector2d[] = [];
+//   for (let x = -offsetX; x <= offsetX; x++) {
+//     for (let y = -offsetY; y <= offsetY; y++) {
+//       offsets.push([x, y]);
+//     }
+//   }
+//   return offsets;
+// }
+
+// generate the offsets in a spiral like array:
+function getOffsets(width: number, height: number): Vector2d[] {
+  const offsetX = Math.ceil(width / 2 / TILE_SIZE);
+  const offsetY = Math.ceil(height / 2 / TILE_SIZE);
+
+  const offsets: Vector2d[] = [];
+  let x = 0;
+  let y = 0;
+  let dx = 0;
+  let dy = -1;
+
+  for (let i = 0; i < Math.max(offsetX, offsetY) ** 2; i++) {
+    if (-offsetX <= x && x <= offsetX && -offsetY <= y && y <= offsetY) {
+      offsets.push([x, y]);
+    }
+
+    if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
+      // Change direction
+      [dx, dy] = [-dy, dx];
+    }
+
+    x += dx;
+    y += dy;
+  }
+
+  // For the case where the view width and height are not equal,
+  // we might have missed some offsets. Fill them in a brute force way.
+  for (let xx = -offsetX; xx <= offsetX; xx++) {
+    for (let yy = -offsetY; yy <= offsetY; yy++) {
+      const exists = offsets.some(([x, y]) => x === xx && y === yy);
+      if (!exists) {
+        offsets.push([xx, yy]);
+      }
+    }
+  }
+
+  return offsets;
+}
 
 export function OsmTiledSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
@@ -259,75 +246,48 @@ export function OsmTiledSource(): ReactElement {
   const isWrappedX = useGisViewerSelector(
     selectViewState("wrapping"),
   ).isWrappedX;
-
   const zoomLevel = useGisViewerSelector(selectZoomLevel);
-  const initialIntegerZoomLevel = Math.floor(zoomLevel + epsilon);
-  const fractionalZoom = zoomLevel - initialIntegerZoomLevel;
-  const scale = 1 + fractionalZoom;
 
-  // const renderedTileSize = Math.max(width, height) * scale;
-  // const renderedTileSize = 256 * scale;
-
-  // console.log("new update");
-  // calculate how many tiles (256px) fit in 1 view (math.max(width, height)) at view zoom level 0
-  // calculate osm zoom level with enough tiles to fit the view, this is now the OSM offset
-  // e.g. view = [600,300], needed tiles: ~2.4 => 4 => zoom level with 4 tiles for whole world: 2
-  // now we can calculate osm tile z value by using the view zoom level and the OSM offset
-
-  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2([width, height]);
-  // console.log({ osmBaseZoomLevel });
-  const integerZoomLevel = initialIntegerZoomLevel + osmBaseZoomLevel;
-  // console.log({ integerZoomLevel });
-  // console.log(calculateTotalTilesPerAxisAtZoomLevel(integerZoomLevel));
-  // console.log(calculateTotalTilesPerAxisAtZoomLevel(integerZoomLevel) * 256);
-  // console.log(
-  //   (calculateTotalTilesPerAxisAtZoomLevel(integerZoomLevel) * 256) /
-  //     Math.max(width, height),
-  // );
-  const n =
-    (calculateTotalTilesPerAxisAtZoomLevel(osmBaseZoomLevel) * 256) /
-    Math.max(width, height);
-  const renderedTileSize = (256 / n) * scale;
-
-  // console.log({ n });
-  // console.log({ renderedTileSize });
-  // const tileNumbersAtNewZoomLevel = calculateTileNumbers(
-  //   centerCoordinate,
-  //   projection.code,
-  //   integerZoomLevel + osmBaseZoomLevel,
-  // );
-
-  const tileNumbers = calculateTileNumbers(
-    centerCoordinate,
-    projection.code,
-    integerZoomLevel,
+  const { integerZoomLevel, renderedTileSize } = useMemo(
+    () => getOsmBaseLevelAndRenderedTileSize(width, height, zoomLevel),
+    [width, height, zoomLevel],
   );
 
-  // console.log({ tileNumbers });
-  // console.log({ tileNumbersAtNewZoomLevel });
-
-  const fractionalTileNumbers = calculateFractionalTileNumbers(
-    centerCoordinate,
-    projection.code,
-    integerZoomLevel,
+  const tileNumbers = useMemo(
+    () =>
+      calculateTileNumbers(centerCoordinate, projection.code, integerZoomLevel),
+    [centerCoordinate, projection.code, integerZoomLevel],
+  );
+  const fractionalTileNumbers = useMemo(
+    () =>
+      calculateFractionalTileNumbers(
+        centerCoordinate,
+        projection.code,
+        integerZoomLevel,
+      ),
+    [centerCoordinate, projection.code, integerZoomLevel],
   );
 
-  const centered: Coordinate = [
-    width / 2 - renderedTileSize / 2,
-    height / 2 - renderedTileSize / 2,
-  ];
-
-  const renderedCenterOffset = calculateRenderedTileCenterOffset(
-    renderedTileSize,
-    fractionalTileNumbers,
-    tileNumbers,
+  const centered: Coordinate = useMemo(
+    () => [width / 2 - renderedTileSize / 2, height / 2 - renderedTileSize / 2],
+    [width, height, renderedTileSize],
   );
-
+  const renderedCenterOffset = useMemo(
+    () =>
+      calculateRenderedTileCenterOffset(
+        renderedTileSize,
+        fractionalTileNumbers,
+        tileNumbers,
+      ),
+    [renderedTileSize, fractionalTileNumbers, tileNumbers],
+  );
   const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
+
+  const offsets = useMemo(() => getOffsets(width, height), [width, height]);
 
   return (
     <>
-      {tileOffsets.map((offset) => (
+      {offsets.map((offset) => (
         <ValidTileRenderer
           key={offset.join()}
           tileNumbers={addVector2d(tileNumbers, offset)}

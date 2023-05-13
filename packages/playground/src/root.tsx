@@ -34,6 +34,9 @@ export function Root() {
                 OSM Single vs Tiled
               </Link>
             </li>
+            <li>
+              <Link to={`experiments/osm-large-screen`}>OSM Large Screen</Link>
+            </li>
           </ul>
         </nav>
       </div>

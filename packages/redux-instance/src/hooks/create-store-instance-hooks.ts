@@ -69,7 +69,8 @@ export function createInstanceHookFactories<N extends string, S>(
   const useInstanceDispatchFactory: InstanceDispatchFactory = (id) =>
     function useInstanceDispatch() {
       const dispatch = useGlobalDispatch();
-      return (action) => dispatch({ ...action, meta: { id } });
+      return (action) =>
+        dispatch({ ...action, meta: { redux_instance_id: id } });
     };
 
   return {

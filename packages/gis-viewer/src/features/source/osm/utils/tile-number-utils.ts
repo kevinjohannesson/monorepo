@@ -2,7 +2,7 @@ import { type Coordinate, type Dimensions } from "../../../../types";
 import { deg2rad } from "utils";
 import proj4 from "proj4";
 
-const TILE_SIZE = 256;
+export const TILE_SIZE = 256;
 
 function calculateNextPowerOf2(x: number): number {
   // https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
