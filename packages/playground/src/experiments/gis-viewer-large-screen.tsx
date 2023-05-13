@@ -25,12 +25,13 @@ export function GisViewerLargeScreenView() {
         dimensions={[1600, 900]}
         zoomLevelLimits={[-2, 16]}
         wrapping={{
-          isWrappedX: true,
+          isWrappedX: false,
           isWrappedY: false,
         }}
       >
         <LayersContainer>
           <Layer>
+            {/* <OsmSingleTileSource /> */}
             <OsmTiledSource />
           </Layer>
 

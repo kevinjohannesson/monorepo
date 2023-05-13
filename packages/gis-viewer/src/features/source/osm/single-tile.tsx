@@ -168,7 +168,8 @@ export function OsmSingleTileSource(): ReactElement {
 
   const scale = 1 + fractionalZoom;
 
-  const renderedTileSize = Math.max(width, height) * scale;
+  const renderedTileSize = width * scale;
+  // const renderedTileSize = Math.max(width, height) * scale;
 
   const tileNumbers = calculateTileNumbers(
     centerCoordinate,

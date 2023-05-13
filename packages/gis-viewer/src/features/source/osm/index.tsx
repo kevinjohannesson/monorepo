@@ -274,7 +274,7 @@ export function OsmSource(): ReactElement {
   // e.g. view = [600,300], needed tiles: ~2.4 => 4 => zoom level with 4 tiles for whole world: 2
   // now we can calculate osm tile z value by using the view zoom level and the OSM offset
 
-  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2([width, height]);
+  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2(width);
   // console.log({ osmBaseZoomLevel });
   const integerZoomLevel = initialIntegerZoomLevel + osmBaseZoomLevel;
   // console.log({ integerZoomLevel });

@@ -201,12 +201,22 @@ function TileClearer({
     const context = canvas.getContext("2d");
     assertNotNull(context);
 
-    context.clearRect(
+    // context.clearRect(
+    //   topLeftPixelCoordinate[0],
+    //   topLeftPixelCoordinate[1],
+    //   renderedTileSize,
+    //   renderedTileSize,
+    // );
+    context.fillStyle = "red";
+    context.fillRect(
       topLeftPixelCoordinate[0],
       topLeftPixelCoordinate[1],
       renderedTileSize,
       renderedTileSize,
     );
+
+    context.fillStyle = "black";
+
     renderGridTile(canvas, topLeftPixelCoordinate, [
       renderedTileSize,
       renderedTileSize,
@@ -271,7 +281,7 @@ const epsilon = 1e-6;
 // Helper functions
 function getOsmBaseLevelAndRenderedTileSize(
   width: number,
-  height: number,
+  // height: number,
   zoomLevel: number,
 ): {
   integerZoomLevel: number;
@@ -280,65 +290,14 @@ function getOsmBaseLevelAndRenderedTileSize(
   const initialIntegerZoomLevel = Math.floor(zoomLevel + epsilon);
   const fractionalZoom = zoomLevel - initialIntegerZoomLevel;
   const scale = 1 + fractionalZoom;
-  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2([width, height]);
+  const osmBaseZoomLevel = calculateOsmZoomBaseLevel2(width);
   const integerZoomLevel = initialIntegerZoomLevel + osmBaseZoomLevel;
   const n =
     (calculateTotalTilesPerAxisAtZoomLevel(osmBaseZoomLevel) * TILE_SIZE) /
-    Math.max(width, height);
+    width;
   const renderedTileSize = (TILE_SIZE / n) * scale;
   return { integerZoomLevel, renderedTileSize };
 }
-
-// function getOffsetsOld(width: number, height: number): Vector2d[] {
-//   const offsetX = Math.ceil(width / 2 / TILE_SIZE);
-//   const offsetY = Math.ceil(height / 2 / TILE_SIZE);
-//   const offsets: Vector2d[] = [];
-//   for (let x = -offsetX; x <= offsetX; x++) {
-//     for (let y = -offsetY; y <= offsetY; y++) {
-//       offsets.push([x, y]);
-//     }
-//   }
-//   return offsets;
-// }
-
-// // generate the offsets in a spiral like array:
-// function getOffsets(width: number, height: number): Vector2d[] {
-//   const offsetX = Math.ceil(width / 2 / TILE_SIZE);
-//   const offsetY = Math.ceil(height / 2 / TILE_SIZE);
-
-//   const offsets: Vector2d[] = [];
-//   let x = 0;
-//   let y = 0;
-//   let dx = 0;
-//   let dy = -1;
-
-//   for (let i = 0; i < Math.max(offsetX, offsetY) ** 2; i++) {
-//     if (-offsetX <= x && x <= offsetX && -offsetY <= y && y <= offsetY) {
-//       offsets.push([x, y]);
-//     }
-
-//     if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
-//       // Change direction
-//       [dx, dy] = [-dy, dx];
-//     }
-
-//     x += dx;
-//     y += dy;
-//   }
-
-//   // For the case where the view width and height are not equal,
-//   // we might have missed some offsets. Fill them in a brute force way.
-//   for (let xx = -offsetX; xx <= offsetX; xx++) {
-//     for (let yy = -offsetY; yy <= offsetY; yy++) {
-//       const exists = offsets.some(([x, y]) => x === xx && y === yy);
-//       if (!exists) {
-//         offsets.push([xx, yy]);
-//       }
-//     }
-//   }
-
-//   return offsets;
-// }
 
 export function OsmTiledSource(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
@@ -352,8 +311,8 @@ export function OsmTiledSource(): ReactElement {
   const zoomLevel = useGisViewerSelector(selectZoomLevel);
 
   const { integerZoomLevel, renderedTileSize } = useMemo(
-    () => getOsmBaseLevelAndRenderedTileSize(width, height, zoomLevel),
-    [width, height, zoomLevel],
+    () => getOsmBaseLevelAndRenderedTileSize(width, zoomLevel),
+    [width, zoomLevel],
   );
 
   const tileNumbers = useMemo(
@@ -384,51 +343,18 @@ export function OsmTiledSource(): ReactElement {
       ),
     [renderedTileSize, fractionalTileNumbers, tileNumbers],
   );
-  const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
-  // const offsets = useMemo(() => getOffsets(width, height), [width, height]);
-  // console.log(offsets);
-  // const offsetX = Math.ceil(width / TILE_SIZE);
-  // const offsetY = Math.ceil(height / TILE_SIZE);
-  // console.log(createSpiralPattern(offsetX, offsetY));
-  // console.log(width);
-  // console.log(Math.ceil(width / 2 / TILE_SIZE));
-  // console.log(Math.ceil(width / 2 / TILE_SIZE));
-  // console.log(Math.ceil(width / 2 / TILE_SIZE));
-  // console.log(width);
-  // console.log(width / TILE_SIZE);
-  // console.log(width / 2 / TILE_SIZE);
-  // console.log(Math.ceil(width / 2 / TILE_SIZE));
-  // console.log(1 + Math.ceil(width / 2 / TILE_SIZE));
-  // console.log(1 + Math.ceil(width / 2 / TILE_SIZE) * 2);
+  const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
   const offsets2 = useMemo(
     () =>
       createSpiralPattern(
-        1 + Math.ceil(width / 2 / TILE_SIZE) * 2,
-        1 + Math.ceil(height / 2 / TILE_SIZE) * 2,
+        1 + Math.ceil(width / 2 / renderedTileSize) * 2,
+        1 + Math.ceil(height / 2 / renderedTileSize) * 2,
       ),
     [width, height],
   );
-  // console.log(offsetX, offsetY);
-  // console.log(createSpiralMatrix(2, 2));
-  // console.log(createSpiralMatrix(2, 2));
-  // console.log(createSpiralMatrix(3, 3));
-  // console.log(createSpiralMatrix(4, 4));
-  // const w = 4;
-  // const h = 2;
 
-  // console.log(
-  //   createSpiralMatrix(w, h).filter(
-  //     ([x, y]) => y <= Math.floor(h / 2) && y >= Math.floor(-h / 2),
-  //   ),
-  // );
-  // console.log(createSpiralMatrix(4, 4));
-
-  // console.log(getOffsets(600, 600));
-  // console.log(getOffsetsOld(600, 600));
-
-  // console.log(createSpiralMatrix(4, 2));
   return (
     <>
       {offsets2.map((offset) => (

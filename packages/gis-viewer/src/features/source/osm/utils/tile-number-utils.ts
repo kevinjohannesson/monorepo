@@ -21,12 +21,9 @@ export function calculateOsmZoomBaseLevel([width, height]: Dimensions): number {
   return osmZoomLevel;
 }
 
-export function calculateOsmZoomBaseLevel2([
-  width,
-  height,
-]: Dimensions): number {
-  const viewSize = Math.max(width, height);
-  const totalTilesOnAxis = viewSize / TILE_SIZE;
+export function calculateOsmZoomBaseLevel2(viewWidth: number): number {
+  // const viewSize = Math.max(width, height);
+  const totalTilesOnAxis = viewWidth / TILE_SIZE;
 
   const nextTotalTilesOnOsm = calculateNextPowerOf2(
     Math.ceil(totalTilesOnAxis),
@@ -35,9 +32,8 @@ export function calculateOsmZoomBaseLevel2([
     Math.ceil(totalTilesOnAxis),
   );
 
-  const nextScalingFactor = (nextTotalTilesOnOsm * TILE_SIZE) / viewSize;
-  const prevScalingFactor = (prevTotalTilesOnOsm * TILE_SIZE) / viewSize;
-
+  const nextScalingFactor = (nextTotalTilesOnOsm * TILE_SIZE) / viewWidth;
+  const prevScalingFactor = (prevTotalTilesOnOsm * TILE_SIZE) / viewWidth;
   const closestScalingFactor =
     Math.abs(1 - nextScalingFactor) <= Math.abs(1 - prevScalingFactor)
       ? nextScalingFactor
