@@ -21,7 +21,7 @@ export function GisViewerLargeScreenView() {
   ];
   return (
     <Provider store={store}>
-      <h3>new *new* **new** tiled test, also with fake lag</h3>
+      {/* <h3>new *new* **new** tiled test, also with fake lag</h3>
       <GisViewerResult
         id={"newtiledtest"}
         initialCenterCoordinate={initialCenterCoordinate}
@@ -42,13 +42,14 @@ export function GisViewerLargeScreenView() {
             <CrosshairSource />
           </Layer>
         </LayersContainer>
-      </GisViewerResult>
-      <h3>Refactored </h3>
+      </GisViewerResult> */}
+      <h3>Refactored OSM tile viewer</h3>
+      <p>(contains fake lag for testing purposes)</p>
       <GisViewerResult
         id={"refactored"}
         initialCenterCoordinate={initialCenterCoordinate}
         initialZoomLevel={initialZoomLevel}
-        dimensions={[900, 400]}
+        dimensions={[1200, 700]}
         zoomLevelLimits={[-2, 16]}
         wrapping={{
           isWrappedX: false,

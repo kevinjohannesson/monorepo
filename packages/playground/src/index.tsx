@@ -19,6 +19,10 @@ const router = createBrowserRouter([
     errorElement: <ErrorView />,
     children: [
       {
+        path: "/",
+        element: <GisViewerLargeScreenView />,
+      },
+      {
         path: "experiments/osm-single-tile",
         element: <GisViewerOsmSingleTileView />,
       },
@@ -37,6 +41,31 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <Root />,
+//     errorElement: <ErrorView />,
+//     children: [
+//       {
+//         path: "experiments/osm-single-tile",
+//         element: <GisViewerOsmSingleTileView />,
+//       },
+//       {
+//         path: "experiments/osm-tiled",
+//         element: <GisViewerTiledView />,
+//       },
+//       {
+//         path: "experiments/osm-single-vs-tiled",
+//         element: <GisViewerOsmSingleVsTiledView />,
+//       },
+//       {
+//         path: "experiments/osm-large-screen",
+//         element: <GisViewerLargeScreenView />,
+//       },
+//     ],
+//   },
+// ]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

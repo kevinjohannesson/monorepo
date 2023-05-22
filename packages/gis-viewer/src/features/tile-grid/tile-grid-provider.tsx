@@ -34,20 +34,21 @@ export function TileGridProvider({
   const value: TileGridContextValue = useMemo(
     () => ({
       pixelOffsetToCenterGrid,
-      /** @todo remove the test values */
-      gridTileIndices: [
-        // [-1, -1],
-        // [-1, 0],
-        // [-1, 1],
+      gridTileIndices,
+      // /** @todo remove the test values */
+      // gridTileIndices: [
+      //   // [-1, -1],
+      //   // [-1, 0],
+      //   // [-1, 1],
 
-        [0, -1],
-        [0, 0],
-        [0, 1],
+      //   [0, -1],
+      //   [0, 0],
+      //   [0, 1],
 
-        // [1, -1],
-        // [1, 0],
-        // [1, 1],
-      ],
+      //   // [1, -1],
+      //   // [1, 0],
+      //   // [1, 1],
+      // ],
       gridTileDimensions,
       gridDimensions,
     }),

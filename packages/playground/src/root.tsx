@@ -122,7 +122,7 @@ export function Root() {
               </Link>
             </li>
             <li>
-              <Link to={`experiments/osm-large-screen`}>OSM Large Screen</Link>
+              <Link to={`experiments/osm-large-screen`}>OSM Tiled [wip]</Link>
             </li>
           </ul>
         </nav>
