@@ -154,16 +154,20 @@ export function TileRenderer({
       );
 
       // console.log("new tile");
-      // if (latestImage.current != null) {
-      //   console.log("drawing latest image");
-      //   context.drawImage(
-      //     latestImage.current,
-      //     topLeftPixelCoordinate[0],
-      //     topLeftPixelCoordinate[1],
-      //     renderedTileSize,
-      //     renderedTileSize,
-      //   );
-      // }
+      if (latestImage.current != null) {
+        // console.log("drawing latest image");
+        context.drawImage(
+          latestImage.current,
+          topLeftPixelCoordinate[0],
+          topLeftPixelCoordinate[1],
+          renderedTileSize * Math.pow(1 + zoomLevel - latestZoomLevel.current, 2),
+          renderedTileSize * Math.pow(1 + zoomLevel - latestZoomLevel.current, 2),
+        );
+        console.log(zoomLevel);
+        console.log(latestZoomLevel.current);
+        console.log(zoomLevel - latestZoomLevel.current);
+        console.log(1 + zoomLevel - latestZoomLevel.current);
+      }
       // context.drawImage(
       //   image,
       //   topLeftPixelCoordinate[0],
@@ -173,26 +177,27 @@ export function TileRenderer({
       // );
       // console.log({ zoomLevel });
       image.onload = function () {
-        // window.setTimeout(() => {
-        context.drawImage(
-          image,
-          topLeftPixelCoordinate[0],
-          topLeftPixelCoordinate[1],
-          renderedTileSize,
-          renderedTileSize,
-        );
+        window.setTimeout(() => {
+          console.log("drawing image");
+          context.drawImage(
+            image,
+            topLeftPixelCoordinate[0],
+            topLeftPixelCoordinate[1],
+            renderedTileSize,
+            renderedTileSize,
+          );
 
-        setCache(image, urlParameters.z, urlParameters.x, urlParameters.y);
+          setCache(image, urlParameters.z, urlParameters.x, urlParameters.y);
 
-        latestImage.current = image;
-        latestZoomLevel.current = zoomLevel;
+          latestImage.current = image;
+          latestZoomLevel.current = zoomLevel;
 
-        renderGridTile(canvas, topLeftPixelCoordinate, [renderedTileSize, renderedTileSize]);
-        renderGridTileIndices(canvas, offset, topLeftPixelCoordinate, [
-          renderedTileSize,
-          renderedTileSize,
-        ]);
-        // }, 1000);
+          renderGridTile(canvas, topLeftPixelCoordinate, [renderedTileSize, renderedTileSize]);
+          renderGridTileIndices(canvas, offset, topLeftPixelCoordinate, [
+            renderedTileSize,
+            renderedTileSize,
+          ]);
+        }, 3000);
 
         // context.drawImage(
         //   image,
@@ -223,6 +228,7 @@ export function TileRenderer({
     image.src = tileUrl;
 
     return () => {
+      console.log("removing onload");
       image.onload = null;
     };
   }, [ref, urlParameters, topLeftPixelCoordinate, renderedTileSize, zoomLevel]);
@@ -375,6 +381,10 @@ export function OsmTiledSource(): ReactElement {
 
   const topLeftPixelCoordinate = addVector2d(centered, renderedCenterOffset);
 
+  console.log({ centered });
+  console.log({ renderedCenterOffset });
+  console.log({ renderedTileSize });
+  console.log(renderedCenterOffset[0] / renderedTileSize);
   const offsets = useMemo(
     () =>
       createSpiralPattern(
@@ -384,9 +394,23 @@ export function OsmTiledSource(): ReactElement {
     [width, height, renderedTileSize],
   );
 
+  // const prevZoomLevel = useRef(zoomLevel);
+  // useEffect(() => {
+  //   console.log("Zoomlevel: ", zoomLevel);
+  //   console.log("prevZoomlevel: ", prevZoomLevel.current);
+  //   console.log(`Zooming ${prevZoomLevel.current < zoomLevel ? "in" : "out"}`);
+  //   // we have a fetched tile
+  //   // we can find out at which zoom level this was procured
+  //   // we can find out the current zoom level
+  //   // we can subtract the procured zoomlevel from the current zoomlevel
+  //   // e.g. 5.1 current, tile fetched at 2,
+  //   prevZoomLevel.current = zoomLevel;
+  // }, [zoomLevel]);
+
   return (
     <>
-      {offsets.map((offset) => (
+      {/* {offsets.map((offset) => ( */}
+      {[[0, 0] as Vector2d].map((offset) => (
         <ValidTileRenderer
           key={offset.join()}
           tileNumbers={addVector2d(tileNumbers, offset)}

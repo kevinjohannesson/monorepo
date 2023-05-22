@@ -1,10 +1,4 @@
-import {
-  type ReactElement,
-  type ReactNode,
-  createContext,
-  useMemo,
-  useRef,
-} from "react";
+import { type ReactElement, type ReactNode, createContext, useMemo, useRef } from "react";
 import { get, set } from "lodash";
 import { useRequiredContext } from "utils";
 
@@ -13,29 +7,18 @@ export interface ImageTileCache {
 }
 
 interface ImageTileCacheContextValue {
-  getCache: (
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => HTMLImageElement | null;
-  setCache: (
-    image: HTMLImageElement,
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => void;
+  getCache: (zoomLevel: number, xIndex: number, yIndex: number) => HTMLImageElement | null;
+  setCache: (image: HTMLImageElement, zoomLevel: number, xIndex: number, yIndex: number) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const ImageTileCacheContext = createContext({} as ImageTileCacheContextValue);
+const TileImageCacheContext = createContext({} as ImageTileCacheContextValue);
 
 interface ImageTileCacheProviderProps {
   children?: ReactNode;
 }
 
-export function ImageTileCacheProvider({
-  children,
-}: ImageTileCacheProviderProps): ReactElement {
+export function TileImageCacheProvider({ children }: ImageTileCacheProviderProps): ReactElement {
   const cache = useRef<ImageTileCache>({ tiles: {} });
 
   const getCache = useMemo(
@@ -45,24 +28,19 @@ export function ImageTileCacheProvider({
   );
 
   const setCache = useMemo(
-    () =>
-      (
-        image: HTMLImageElement,
-        zoomLevel: number,
-        xIndex: number,
-        yIndex: number,
-      ) => {
-        set(cache.current.tiles, `${zoomLevel}/${xIndex}/${yIndex}`, image);
-      },
+    () => (image: HTMLImageElement, zoomLevel: number, xIndex: number, yIndex: number) => {
+      set(cache.current.tiles, `${zoomLevel}/${xIndex}/${yIndex}`, image);
+    },
     [],
   );
 
   return (
-    <ImageTileCacheContext.Provider value={{ getCache, setCache }}>
+    <TileImageCacheContext.Provider value={{ getCache, setCache }}>
       {children}
-    </ImageTileCacheContext.Provider>
+    </TileImageCacheContext.Provider>
   );
 }
 
-export const useImageTileCacheContext = (): ImageTileCacheContextValue =>
-  useRequiredContext(ImageTileCacheContext, "Image Tile Cache Context");
+export function useTileImageCacheContext(): ImageTileCacheContextValue {
+  return useRequiredContext(TileImageCacheContext, "Image Tile Cache Context");
+}

@@ -108,8 +108,8 @@ export function CursorCoordinatesMapInfoItem({
   return (
     <div
       className={`flex gap-2 items-center text-sm ${
-        isNull(cursorCoordinate) ? "text-slate-400" : "text-slate-700"
-      } z-10`}
+        cursorCoordinate != null ? "font-mono" : ""
+      } ${isNull(cursorCoordinate) ? "text-slate-400" : "text-slate-700"} z-10`}
     >
       <MdOutlineMouse />
       <span>{coordinatesOrPlaceholder}</span>

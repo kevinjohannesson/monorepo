@@ -5,13 +5,13 @@ import { type Projection } from "../projections";
 import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
 import { ViewContainer } from "./container";
 import { ViewContext } from "./context";
-import { type ViewWrapping, updateSlice } from "./slice";
+import { type ViewWrapping, selectIsInitialized, setIsInitialized, updateSlice } from "./slice";
 import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
 import { isUndefined } from "lodash";
-import { useGisViewerDispatch } from "../../slice";
+import { useGisViewerDispatch, useGisViewerSelector } from "../../slice";
 
 export interface ResolutionProps {
   initialResolution: number;
@@ -45,27 +45,21 @@ export function View({
   wrapping,
 }: ViewProps): ReactElement {
   if (!isUndefined(initialZoomLevel) && !isUndefined(initialResolution)) {
-    throw new Error(
-      "Providing both initialZoomLevel and initialResolution is not supported.",
-    );
+    throw new Error("Providing both initialZoomLevel and initialResolution is not supported.");
   }
 
   const ref = useRef<HTMLDivElement | null>(null);
 
   const dispatch = useGisViewerDispatch();
 
+  const isInitialized = useGisViewerSelector(selectIsInitialized);
+
   useEffect(() => {
-    const baseResolution = calculateBaseResolution(
-      projection.projectedExtent,
-      dimensions,
-    );
+    const baseResolution = calculateBaseResolution(projection.projectedExtent, dimensions);
 
     const currentResolution =
-      initialResolution ??
-      calculateResolutionFromZoomLevel(baseResolution, initialZoomLevel ?? 0);
+      initialResolution ?? calculateResolutionFromZoomLevel(baseResolution, initialZoomLevel ?? 0);
 
-    console.log({ baseResolution });
-    console.log({ currentResolution });
     dispatch(
       updateSlice({
         centerCoordinate: initialCenterCoordinate,
@@ -75,6 +69,8 @@ export function View({
         zoomLevelLimits,
       }),
     );
+
+    dispatch(setIsInitialized());
   }, [
     dimensions,
     dispatch,
@@ -89,7 +85,7 @@ export function View({
   return (
     <ViewContext.Provider value={{ ref }}>
       <ViewContainer ref={ref} dimensions={dimensions}>
-        {children}
+        {isInitialized ? children : null}
       </ViewContainer>
     </ViewContext.Provider>
   );

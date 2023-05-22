@@ -14,3 +14,13 @@ export function assertNotNull<T>(
     throw new Error(`${name} is null.`);
   }
 }
+
+export function isLowestNumber(num: number, arr: number[]): boolean {
+  const min = Math.min(...arr);
+  return num === min;
+}
+
+export function isHighestNumber(num: number, arr: number[]): boolean {
+  const min = Math.max(...arr);
+  return num === min;
+}

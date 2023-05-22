@@ -130,7 +130,7 @@ export function TileRenderer({
 
     const image = new Image();
 
-    // console.log({ zoomLevel });
+    console.log({ zoomLevel });
 
     if (cachedImage != null) {
       context.drawImage(
@@ -153,7 +153,7 @@ export function TileRenderer({
         renderedTileSize,
       );
 
-      // console.log("new tile");
+      console.log("new tile");
       // if (latestImage.current != null) {
       //   console.log("drawing latest image");
       //   context.drawImage(
@@ -383,6 +383,19 @@ export function OsmTiledSource(): ReactElement {
       ),
     [width, height, renderedTileSize],
   );
+
+  // const prevZoomLevel = useRef(zoomLevel);
+  // useEffect(() => {
+  //   console.log("Zoomlevel: ", zoomLevel);
+  //   console.log("prevZoomlevel: ", prevZoomLevel.current);
+  //   console.log(`Zooming ${prevZoomLevel.current < zoomLevel ? "in" : "out"}`);
+  //   // we have a fetched tile
+  //   // we can find out at which zoom level this was procured
+  //   // we can find out the current zoom level
+  //   // we can subtract the procured zoomlevel from the current zoomlevel
+  //   // e.g. 5.1 current, tile fetched at 2,
+  //   prevZoomLevel.current = zoomLevel;
+  // }, [zoomLevel]);
 
   return (
     <>

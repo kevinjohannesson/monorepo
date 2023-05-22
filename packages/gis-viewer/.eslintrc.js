@@ -3,11 +3,7 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: [
-    "plugin:react/recommended",
-    "standard-with-typescript",
-    "plugin:prettier/recommended",
-  ],
+  extends: ["plugin:react/recommended", "standard-with-typescript", "plugin:prettier/recommended"],
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
@@ -16,10 +12,7 @@ module.exports = {
   },
   rules: {
     "react/react-in-jsx-scope": "off",
-    "prettier/prettier": [
-      "error",
-      { singleQuote: false, trailingComma: "all" },
-    ],
+    "prettier/prettier": ["error", { singleQuote: false, trailingComma: "all", printWidth: 100 }],
     "sort-imports-es6-autofix/sort-imports-es6": "error",
   },
   plugins: ["react", "sort-imports-es6-autofix"],

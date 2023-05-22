@@ -1,8 +1,8 @@
 import { Vector2d } from "./types";
 
-type Vector2dOrNumber = Vector2d | number;
+type Vector2dOrScalar = Vector2d | number;
 
-function ensureVector2d(input: Vector2dOrNumber): Vector2d {
+export function ensureVector2d(input: Vector2dOrScalar): Vector2d {
   if (typeof input === "number") {
     return [input, input];
   } else {
@@ -11,8 +11,8 @@ function ensureVector2d(input: Vector2dOrNumber): Vector2d {
 }
 
 export function addVector2d(
-  firstVector2d: Vector2dOrNumber,
-  ...vectors: Vector2dOrNumber[]
+  firstVector2d: Vector2dOrScalar,
+  ...vectors: Vector2dOrScalar[]
 ): Vector2d {
   const initialCoord = ensureVector2d(firstVector2d);
 
@@ -24,8 +24,8 @@ export function addVector2d(
 }
 
 export function subtractVector2d(
-  firstVector2d: Vector2dOrNumber,
-  ...vectors: Vector2dOrNumber[]
+  firstVector2d: Vector2dOrScalar,
+  ...vectors: Vector2dOrScalar[]
 ): Vector2d {
   const initialCoord = ensureVector2d(firstVector2d);
 
@@ -37,8 +37,8 @@ export function subtractVector2d(
 }
 
 export function multiplyVector2d(
-  firstVector2d: Vector2dOrNumber,
-  ...vectors: Vector2dOrNumber[]
+  firstVector2d: Vector2dOrScalar,
+  ...vectors: Vector2dOrScalar[]
 ): Vector2d {
   const initialCoord = ensureVector2d(firstVector2d);
 
@@ -50,8 +50,8 @@ export function multiplyVector2d(
 }
 
 export function divideVector2d(
-  firstVector2d: Vector2dOrNumber,
-  ...vectors: Vector2dOrNumber[]
+  firstVector2d: Vector2dOrScalar,
+  ...vectors: Vector2dOrScalar[]
 ): Vector2d {
   const initialCoord = ensureVector2d(firstVector2d);
 

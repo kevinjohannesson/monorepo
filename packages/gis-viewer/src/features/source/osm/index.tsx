@@ -1,49 +1,36 @@
 import { type Coordinate } from "../../../types";
-import { type ReactElement, useEffect, useRef } from "react";
+import { OsmTileImageFetcher } from "./osm-tile-image-fetcher";
+import { OsmTileRenderer } from "./osm-tile-renderer";
+import { type ReactElement, useEffect } from "react";
+import { TileGridProvider } from "../../tile-grid";
+import { TileImageCacheProvider as TileImageCacheProviderNew } from "../../cache/tile-image-cache";
 import { type UrlParameters } from "./types";
-import {
-  type Vector2d,
-  addVector2d,
-  assertNotNull,
-  multiplyVector2d,
-} from "utils";
+import { type Vector2d, addVector2d, assertNotNull, multiplyVector2d } from "utils";
 import {
   calculateFractionalTileNumbers,
-  calculateOsmZoomBaseLevel,
   calculateOsmZoomBaseLevel2,
   calculateTileNumbers,
   calculateTotalTilesPerAxisAtZoomLevel,
   calculateWrappedTileNumberX,
 } from "./utils/tile-number-utils";
 import { calculateRenderedTileCenterOffset } from "./utils/rendered-tile-utils";
-import { isValidUrlParameters } from "./utils/url-parameters-utils";
+import { isValidOsmUrlParameters } from "./utils/url-parameters-utils";
 import { selectViewState, selectZoomLevel } from "../../view/slice";
 import { useGisViewerSelector } from "../../../slice";
-import { useImageTileCacheContext } from "../../cache";
 import { useLayerContext } from "../../layer";
+import { useOsmBaseTileSize } from "./hooks/use-osm-base-tile-size";
+import { useTileImageCacheContext } from "../../cache";
+import { useViewDimensions } from "../../view/hooks/use-view-state";
 
 const TILE_SERVER_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 const loadAndCacheTileImage = async (
   urlParameters: UrlParameters,
-  getCache: (
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => HTMLImageElement | null,
-  setCache: (
-    image: HTMLImageElement,
-    zoomLevel: number,
-    xIndex: number,
-    yIndex: number,
-  ) => void,
+  getCache: (zoomLevel: number, xIndex: number, yIndex: number) => HTMLImageElement | null,
+  setCache: (image: HTMLImageElement, zoomLevel: number, xIndex: number, yIndex: number) => void,
 ): Promise<HTMLImageElement> => {
   return await new Promise<HTMLImageElement>((resolve) => {
-    const cachedImage = getCache(
-      urlParameters.z,
-      urlParameters.x,
-      urlParameters.y,
-    );
+    const cachedImage = getCache(urlParameters.z, urlParameters.x, urlParameters.y);
 
     if (cachedImage != null) {
       resolve(cachedImage);
@@ -76,7 +63,7 @@ export function TileRenderer({
   renderedTileSize,
 }: TileRendererProps): null {
   const { ref } = useLayerContext();
-  const { getCache, setCache } = useImageTileCacheContext();
+  const { getCache, setCache } = useTileImageCacheContext();
   // const imageRef = useRef<HTMLImageElement>(new Image());
   useEffect(() => {
     const canvas = ref.current;
@@ -84,11 +71,7 @@ export function TileRenderer({
     const context = canvas.getContext("2d");
     assertNotNull(context);
 
-    const cachedImage = getCache(
-      urlParameters.z,
-      urlParameters.x,
-      urlParameters.y,
-    );
+    const cachedImage = getCache(urlParameters.z, urlParameters.x, urlParameters.y);
 
     const tileUrl = TILE_SERVER_URL.replace("{z}", urlParameters.z.toString())
       .replace("{x}", urlParameters.x.toString())
@@ -171,10 +154,7 @@ export function TileRenderer({
 
 interface TileClearerProps extends Omit<TileRendererProps, "urlParameters"> {}
 
-function TileClearer({
-  topLeftPixelCoordinate,
-  renderedTileSize,
-}: TileClearerProps): null {
+function TileClearer({ topLeftPixelCoordinate, renderedTileSize }: TileClearerProps): null {
   const { ref } = useLayerContext();
 
   useEffect(() => {
@@ -218,7 +198,7 @@ function ValidTileRenderer({
     y,
   };
 
-  if (isValidUrlParameters(urlParameters)) {
+  if (isValidOsmUrlParameters(urlParameters)) {
     return (
       <TileRenderer
         topLeftPixelCoordinate={topLeftPixelCoordinate}
@@ -250,15 +230,11 @@ const tileOffsets: Vector2d[] = [
 
 const epsilon = 1e-6;
 
-export function OsmSource(): ReactElement {
+export function OsmSourceOLD(): ReactElement {
   const [width, height] = useGisViewerSelector(selectViewState("dimensions"));
   const projection = useGisViewerSelector(selectViewState("projection"));
-  const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate"),
-  );
-  const isWrappedX = useGisViewerSelector(
-    selectViewState("wrapping"),
-  ).isWrappedX;
+  const centerCoordinate = useGisViewerSelector(selectViewState("centerCoordinate"));
+  const isWrappedX = useGisViewerSelector(selectViewState("wrapping")).isWrappedX;
 
   const zoomLevel = useGisViewerSelector(selectZoomLevel);
   const initialIntegerZoomLevel = Math.floor(zoomLevel + epsilon);
@@ -285,8 +261,7 @@ export function OsmSource(): ReactElement {
   //     Math.max(width, height),
   // );
   const n =
-    (calculateTotalTilesPerAxisAtZoomLevel(osmBaseZoomLevel) * 256) /
-    Math.max(width, height);
+    (calculateTotalTilesPerAxisAtZoomLevel(osmBaseZoomLevel) * 256) / Math.max(width, height);
   const renderedTileSize = (256 / n) * scale;
 
   // console.log({ n });
@@ -297,11 +272,7 @@ export function OsmSource(): ReactElement {
   //   integerZoomLevel + osmBaseZoomLevel,
   // );
 
-  const tileNumbers = calculateTileNumbers(
-    centerCoordinate,
-    projection.code,
-    integerZoomLevel,
-  );
+  const tileNumbers = calculateTileNumbers(centerCoordinate, projection.code, integerZoomLevel);
 
   // console.log({ tileNumbers });
   // console.log({ tileNumbersAtNewZoomLevel });
@@ -342,5 +313,21 @@ export function OsmSource(): ReactElement {
         />
       ))}
     </>
+  );
+}
+
+/// NEW
+
+export function OsmSource(): ReactElement {
+  const viewDimensions = useViewDimensions();
+  const osmBaseTileSize = useOsmBaseTileSize();
+
+  return (
+    <TileGridProvider gridDimensions={viewDimensions} tileDimensions={osmBaseTileSize}>
+      <TileImageCacheProviderNew>
+        <OsmTileImageFetcher />
+        <OsmTileRenderer />
+      </TileImageCacheProviderNew>
+    </TileGridProvider>
   );
 }
