@@ -12,10 +12,7 @@ export function calculateUpdatedZoomLevel(
   currentResolution: number,
   deltaZoom: number,
 ): number {
-  const currentZoomLevel = calculateZoomLevelFromResolution(
-    baseResolution,
-    currentResolution,
-  );
+  const currentZoomLevel = calculateZoomLevelFromResolution(baseResolution, currentResolution);
   return currentZoomLevel + deltaZoom;
 }
 
@@ -23,5 +20,8 @@ export function isZoomLevelWithinLimits(
   zoomLevel: number,
   [minZoomLevel, maxZoomLevel]: Limits,
 ): boolean {
-  return zoomLevel >= minZoomLevel && zoomLevel <= maxZoomLevel;
+  const zoomLevelInt = Math.round(zoomLevel * 100);
+  const minZoomLevelInt = Math.round(minZoomLevel * 100);
+  const maxZoomLevelInt = Math.round(maxZoomLevel * 100);
+  return zoomLevelInt >= minZoomLevelInt && zoomLevelInt <= maxZoomLevelInt;
 }

@@ -1,4 +1,4 @@
-import { Fragment, type ReactElement } from "react";
+import { Fragment, type ReactElement, useEffect } from "react";
 import {
   type ReferenceTile,
   type TileImageCacheContextValue,
@@ -8,26 +8,37 @@ import { TileImage } from "./osm-tile";
 import {
   type Vector2d,
   addVector2d,
+  assertNotNull,
   divideVector2d,
+  getClosestHigherNumberFrom,
+  getClosestNumberFrom,
   getClosestNumberTo,
+  isHighestNumber,
   isLowestNumber,
   isNull,
   multiplyVector2d,
   subtractVector2d,
 } from "utils";
-import { isUndefined } from "lodash";
-import { toWholeTileNumbers, toWholeZoomLevel } from "./utils/tile-number-utils";
+import {
+  calculateZoomAdjustedTileDimensions,
+  toWholeTileNumbers,
+  toWholeZoomLevel,
+} from "./utils/tile-number-utils";
+import { isEmpty, isUndefined } from "lodash";
+import { isValidOsmUrlParameters } from "./utils/url-parameters-utils";
+import { useLayerContext } from "../../layer";
+import { useOsmBaseZoomLevel } from "./hooks/use-osm-base-zoom-level";
 import { useOsmFractionalScaledZoomLevel } from "./hooks/use-osm-scaled-zoom-level";
 import { useOsmFractionalTileNumbers } from "./hooks/use-osm-tile-numbers";
 import { useTileGridContext } from "../../tile-grid/tile-grid-provider";
 import { useViewCenterCoordinate } from "../../view/hooks/use-view-state";
 
-function calculateZoomLevelScaleFactor(
-  osmFractionalScaledZoomLevel: number,
-  zoomLevelFromCache: number,
-): number {
-  return Math.pow(2, osmFractionalScaledZoomLevel - zoomLevelFromCache);
-}
+// function calculateZoomLevelScaleFactor(
+//   osmFractionalScaledZoomLevel: number,
+//   zoomLevelFromCache: number,
+// ): number {
+//   return Math.pow(2, osmFractionalScaledZoomLevel - zoomLevelFromCache);
+// }
 
 function calculateHalfZoomDeltaTileWidth(
   tileDimensionsAfterZoom: Vector2d,
@@ -93,9 +104,52 @@ function calculateLowerZoomLevelQuadrant(
   return currentQuadrant as Vector2d;
 }
 
+function calculateTileAtHigherZoomLevel(
+  fractionalNumbers: Vector2d,
+  levelsToIncrease = 1,
+): Vector2d {
+  let currentTile = toWholeTileNumbers(fractionalNumbers);
+
+  for (let i = 0; i < levelsToIncrease; i++) {
+    currentTile = [
+      currentTile[0] * 2 + (fractionalNumbers[0] >= 0.5 ? 1 : 0),
+      currentTile[1] * 2 + (fractionalNumbers[1] >= 0.5 ? 1 : 0),
+    ];
+  }
+
+  return currentTile as Vector2d;
+}
+
+function getClosestHigherZoomLevelForTile(
+  referenceTile: ReferenceTile,
+  availableZoomLevels: number[],
+  tileImageCache: TileImageCacheContextValue,
+): number | null {
+  const higherZoomLevelsInCacheReversed = [...availableZoomLevels];
+
+  for (const higherZoomLevel of higherZoomLevelsInCacheReversed) {
+    const [higherZoomLevelQuadrantTileNumberX, higherZoomLevelQuadrantTileNumberY] =
+      calculateTileAtHigherZoomLevel(
+        referenceTile.fractionalTileNumbers,
+        Math.abs(higherZoomLevel - referenceTile.wholeZoomLevel),
+      );
+
+    const image = tileImageCache.getTileImage(
+      higherZoomLevelQuadrantTileNumberX,
+      higherZoomLevelQuadrantTileNumberY,
+      higherZoomLevel,
+    );
+
+    if (!isNull(image)) {
+      return higherZoomLevel;
+    }
+  }
+
+  return null;
+}
 function getLowerZoomLevelQuadrantTileZoomLevel(
   availableZoomLevels: number[],
-  // make reference tile
+  /** @todo make reference tile */
   osmWholeTileNumbers: Vector2d,
   zoomLevelFromCache: number,
   tileImageCache: TileImageCacheContextValue,
@@ -123,13 +177,36 @@ function getLowerZoomLevelQuadrantTileZoomLevel(
   return null;
 }
 
+interface CleanUpProps {
+  dx: number;
+  dy: number;
+  dw: number;
+  dh: number;
+}
+
+function CleanUp({ dx, dy, dh, dw }: CleanUpProps): null {
+  const layerContext = useLayerContext();
+  useEffect(() => {
+    // console.log("MyEffect");
+    const ctx = layerContext.ref.current?.getContext("2d");
+    assertNotNull(ctx);
+
+    ctx.clearRect(dx, dy, dw, dh);
+  }, [dx, dy, dw, dh]);
+  return null;
+}
+
 export function OsmTileRenderer(): ReactElement {
   // Get the current center coordinate of the view.
   const viewCenterCoordinate = useViewCenterCoordinate();
 
   // Obtain dimensional and offset data related to the tile grid.
-  const { gridTileIndices, gridTileDimensions, pixelOffsetToCenterGrid, gridDimensions } =
-    useTileGridContext();
+  const {
+    indices: gridTileIndices,
+    gridTileDimensions,
+    pixelOffsetToCenterGrid,
+    dimensions: gridDimensions,
+  } = useTileGridContext();
   const [pixelOffsetToCenterGridX, pixelOffsetToCenterGridY] = pixelOffsetToCenterGrid;
   const [gridWidth, gridHeight] = gridDimensions;
 
@@ -155,7 +232,7 @@ export function OsmTileRenderer(): ReactElement {
     );
 
   return (
-    <>
+    <Fragment>
       {tileImageCache.availableZoomLevels.map((zoomLevelFromCache) => {
         const availableZoomLevelsInCacheLowerThanZoomLevelFromCache =
           tileImageCache.availableZoomLevels
@@ -167,12 +244,11 @@ export function OsmTileRenderer(): ReactElement {
         // to the current zoom level. This ensures that if a tile is available and rendered, it
         // aligns properly with the tiles of higher and lower levels.
 
-        const zoomLevelScaleFactor = calculateZoomLevelScaleFactor(
-          osmFractionalScaledZoomLevel,
+        const tileDimensionsAfterZoom = calculateZoomAdjustedTileDimensions(
+          gridTileDimensions,
           zoomLevelFromCache,
+          osmFractionalScaledZoomLevel,
         );
-
-        const tileDimensionsAfterZoom = multiplyVector2d(zoomLevelScaleFactor, gridTileDimensions);
         const [tileWidthAfterZoom, tileHeightAfterZoom] = tileDimensionsAfterZoom;
 
         const [halfZoomDeltaTileWidth, halfZoomDeltaTileHeight] = calculateHalfZoomDeltaTileWidth(
@@ -219,7 +295,7 @@ export function OsmTileRenderer(): ReactElement {
         // Create a new fragment for this zoom level, which will contain all tiles to be rendered at
         // this zoom level. The rest of the logic for each zoom level (e.g., determining which tiles
         // to render and how to position them) is handled on a specific per grid tile index level.
-
+        // console.log(tileImageCache.state);
         return (
           <Fragment key={zoomLevelFromCache}>
             {gridTileIndices.map((gridTileIndex) => {
@@ -229,10 +305,13 @@ export function OsmTileRenderer(): ReactElement {
 
               const [gridTileIndexX, gridTileIndexY] = gridTileIndex;
 
-              const osmWholeTileNumbersForGridTileIndex = addVector2d(
-                osmWholeCenterTileNumbersAtZoomLevel,
+              const fractionalOsmTileNumbers = addVector2d(
+                osmFractionalCenterTileNumbersAtZoomLevel,
                 gridTileIndex,
               );
+
+              const osmWholeTileNumbersForGridTileIndex =
+                toWholeTileNumbers(fractionalOsmTileNumbers);
 
               const [osmWholeTileNumbersForGridTileIndexX, osmWholeTileNumbersForGridTileIndexY] =
                 osmWholeTileNumbersForGridTileIndex;
@@ -242,10 +321,6 @@ export function OsmTileRenderer(): ReactElement {
                 osmWholeTileNumbersForGridTileIndexY,
                 zoomLevelFromCache,
               );
-
-              if (isNull(imageFromCache)) {
-                return null;
-              }
 
               // Decision to render an image at this zoom level is based on multiple factors.
               // We generally skip tiles if they can be better represented by a tile from a different zoom level.
@@ -293,15 +368,7 @@ export function OsmTileRenderer(): ReactElement {
               // we need to render this image.
               const lowerQuadrantExists = !isNull(lowerZoomLevelQuadrantZoomLevel);
 
-              // Skip rendering this tile if it's too zoomed out, a better resolution lower quadrant tile exists, and
-              // either it's not the lowest available zoom level or a lower quadrant tile exists.
-              if (
-                zoomLevelFromCacheIsTooHigh &&
-                !isCloserZoomLevelMatchThanLowerQuadrant &&
-                (!isLowestZoomLevelInCache || lowerQuadrantExists)
-              ) {
-                return null;
-              }
+              // ///////////////////////////////////////////////////////////////////////////
 
               // Compute the position and dimensions of the tile image.
               // This position calculation takes into account the offset to the grid center, the
@@ -320,25 +387,119 @@ export function OsmTileRenderer(): ReactElement {
               const dw = tileWidthAfterZoom;
               const dh = dw;
 
+              if (isNull(imageFromCache) && !lowerQuadrantExists) {
+                return <CleanUp key={gridTileIndex.join()} dx={dx} dy={dy} dw={dw} dh={dh} />;
+              }
+
+              // Skip rendering this tile if it's too zoomed out, a better resolution lower quadrant tile exists, and
+              // either it's not the lowest available zoom level or a lower quadrant tile exists.
+              if (
+                zoomLevelFromCacheIsTooHigh &&
+                !isCloserZoomLevelMatchThanLowerQuadrant &&
+                (!isLowestZoomLevelInCache || lowerQuadrantExists)
+              ) {
+                return null;
+              }
+
               if (dx + dw < 0 || dy + dh < 0 || dx > gridWidth || dy > gridHeight) {
                 // If a tile is completely outside the visible canvas area, we skip rendering it for performance.
                 return null;
               }
 
+              if (isNull(imageFromCache)) {
+                return null;
+              }
+
+              // const validGidTileIndices = gridTileIndices.filter(
+              //   (indices) =>
+              //     isValidOsmUrlParameters({
+              //       x: osmWholeCenterTileNumbersAtZoomLevel[0] + indices[0],
+              //       y: osmWholeCenterTileNumbersAtZoomLevel[1] + indices[1],
+              //       z: zoomLevelFromCache,
+              //     }) &&
+              //     !isNull(
+              //       tileImageCache.getTileImage(
+              //         osmWholeCenterTileNumbersAtZoomLevel[0] + indices[0],
+              //         osmWholeCenterTileNumbersAtZoomLevel[1] + indices[1],
+              //         zoomLevelFromCache,
+              //       ),
+              //     ),
+              // );
+
+              // console.log({ validGidTileIndices });
+
+              // const validGridTileIndicesX = validGidTileIndices.map(([x]) => x);
+              // const validGridTileIndicesY = validGidTileIndices.map(([_, y]) => y);
+
+              // const isRightEdge = isHighestNumber(gridTileIndexX, validGridTileIndicesX);
+              // const isBottomEdge = isHighestNumber(gridTileIndexY, validGridTileIndicesY);
+              // const isLeftEdge = isLowestNumber(gridTileIndexX, gridTileIndicesX);
+              // const isTopEdge = isLowestNumber(gridTileIndexY, gridTileIndicesY);
+              // console.log({ gridTileIndices });
+              // if (isRightEdge) {
+              //   console.log("Is the right edge: ", gridTileIndexX, gridTileIndexY);
+              // }
+              // if (isBottomEdge) {
+              //   console.log("Is the bottom edge: ", gridTileIndexX, gridTileIndexY);
+              // }
+              // if (isLeftEdge) {
+              //   console.log("Is the left edge: ", gridTileIndexX, gridTileIndexY);
+              // }
+
               return (
-                <TileImage
-                  key={gridTileIndex.join()}
-                  dx={dx}
-                  dy={dy}
-                  dw={dw}
-                  dh={dh}
-                  image={imageFromCache}
-                />
+                <Fragment key={gridTileIndex.join()}>
+                  <TileImage dx={dx} dy={dy} dw={dw} dh={dh} image={imageFromCache} />
+                  {/* {isRightEdge || isBottomEdge || isLeftEdge || isTopEdge ? (
+                    isRightEdge && isBottomEdge && isLeftEdge && isTopEdge ? (
+                      <>
+                       
+                      </>
+                    ) : isRightEdge && isBottomEdge && isLeftEdge ? (
+                      <>
+                        
+                      </>
+                    ) : isRightEdge && isBottomEdge ? (
+                      <>
+                        <CleanUp
+                          dx={dx + dw}
+                          dy={dy}
+                          dw={gridWidth - (dx + dw)}
+                          dh={gridHeight - dy + dh + dh}
+                        />
+                        <CleanUp
+                          dx={dx}
+                          dy={dy + dh}
+                          dw={dw + gridWidth - (dx + dw)}
+                          dh={gridHeight - dy + dh}
+                        />
+                      </>
+                    ) : isRightEdge ? (
+                      <CleanUp dx={dx + dw} dy={dy} dw={gridWidth - (dx + dw)} dh={dh} />
+                    ) : isBottomEdge ? (
+                      <CleanUp dx={dx} dy={dy + dh} dw={dw} dh={gridHeight - dy + dh} />
+                    ) : isLeftEdge ? (
+                      <CleanUp dx={0} dy={dy} dw={dx} dh={dh} />
+                    ) : (
+                      <CleanUp dx={dx} dy={0} dw={dw} dh={gridHeight - dy} />
+                    )
+                  ) : null} */}
+                  {/* {isBottomEdge && (
+                    <CleanUp dx={dx} dy={dy + dh} dw={dw} dh={gridHeight - dy + dh} />
+                  )} */}
+
+                  {/* {(isTopEdge && isLeftEdge) && } */}
+                  {/* {isLeftEdge&&<CleanUp dx={0} dy={dy} dw={dx} dh={dh} />} */}
+                  {/* {isRightEdge && (
+                    <CleanUp dx={dx + dw} dy={dy} dw={gridWidth - (dx + dw)} dh={dh} />
+                  )} */}
+                  {/* {isTopEdge && <CleanUp dx={dx} dy={0} dw={dw} dh={gridHeight - dy} />}
+                  {isBottomEdge && <CleanUp dx={dx} dy={dy + dh} dw={dw} dh={gridHeight - dy + dh} />} */}
+                </Fragment>
               );
             })}
           </Fragment>
         );
       })}
-    </>
+    </Fragment>
   );
 }

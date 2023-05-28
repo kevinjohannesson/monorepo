@@ -58,7 +58,11 @@ function calculatePixelOffsetFromCenterTile(
 export function OsmTileRenderer(): ReactElement {
   const viewCenterCoordinate = useViewCenterCoordinate();
 
-  const { gridTileIndices, gridTileDimensions, pixelOffsetToCenterGrid } = useTileGridContext();
+  const {
+    indices: gridTileIndices,
+    gridTileDimensions,
+    pixelOffsetToCenterGrid,
+  } = useTileGridContext();
   const [gridTileWidth, gridTileHeight] = gridTileDimensions;
   const [pixelOffsetToCenterGridX, pixelOffsetToCenterGridY] = pixelOffsetToCenterGrid;
 

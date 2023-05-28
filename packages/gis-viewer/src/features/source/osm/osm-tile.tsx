@@ -16,6 +16,7 @@ export function TileImage({ dx, dy, dh, dw, image }: TileImageProps): null {
   const layerContext = useLayerContext();
 
   useEffect(() => {
+    // console.log("TileImage");
     const ctx = layerContext.ref.current?.getContext("2d");
     assertNotNull(ctx);
     // console.log("Drawing image.");

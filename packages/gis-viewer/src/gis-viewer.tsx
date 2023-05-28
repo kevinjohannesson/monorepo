@@ -12,9 +12,10 @@ import { OsmSourceOLD } from "./features/source/osm";
 import { PanControl } from "./features/control/pan-control";
 import { PanInteraction } from "./features/interaction/pan-interaction";
 import { Provider } from "react-redux";
-import { type ReactElement } from "react";
+import { type ReactElement, type ReactNode } from "react";
 import { TileImageCacheProvider } from "./features/cache";
-import { View, type ViewProps } from "./features/view";
+import { type Vector2d } from "utils";
+import { View, ViewMirror, type ViewProps } from "./features/view";
 import { ZoomControl } from "./features/control/zoom-control";
 import { ZoomInteraction } from "./features/interaction/zoom-interaction";
 import { ZoomLevelInfoItem } from "./features/map-info/zoom-level-info-item";
@@ -30,15 +31,15 @@ export const store = configureStore({
   reducer: rootReducer,
 });
 
-export interface GisViewerProps extends MetadataProviderProps, Omit<ViewProps, "children"> {
+export interface GisViewerPropsOLD extends MetadataProviderProps, Omit<ViewProps, "children"> {
   children?: never;
 }
 
-export function GisViewer({
+export function GisViewerOLD({
   id,
   initialCenterCoordinate,
   initialZoomLevel,
-}: GisViewerProps): ReactElement {
+}: GisViewerPropsOLD): ReactElement {
   // console.log({ id });
 
   return (
@@ -81,7 +82,54 @@ export function GisViewer({
   );
 }
 
-export type GisViewerProps2 = MetadataProviderProps & ViewProps;
+export type GisViewerPropsOLD2 = MetadataProviderProps & ViewProps;
+
+export type GisViewerProps = MetadataProviderProps & ViewProps;
+
+export function GisViewer({
+  id,
+  initialCenterCoordinate,
+  initialZoomLevel,
+  children,
+  dimensions,
+  zoomLevelLimits,
+  wrapping,
+}: GisViewerProps): ReactElement {
+  return (
+    <MetadataProvider id={id}>
+      <GisViewerInstance>
+        <View
+          initialCenterCoordinate={initialCenterCoordinate}
+          initialZoomLevel={initialZoomLevel}
+          dimensions={dimensions}
+          zoomLevelLimits={zoomLevelLimits}
+          wrapping={wrapping}
+        >
+          {children}
+        </View>
+      </GisViewerInstance>
+    </MetadataProvider>
+  );
+}
+
+export interface GisViewerMirrorProps {
+  mirroredId: string;
+  children?: ReactNode;
+  dimensions?: Vector2d;
+}
+export function GisViewerMirror({
+  mirroredId,
+  children,
+  dimensions,
+}: GisViewerMirrorProps): ReactElement {
+  return (
+    <MetadataProvider id={mirroredId}>
+      <GisViewerInstance>
+        <ViewMirror dimensions={dimensions}>{children}</ViewMirror>
+      </GisViewerInstance>
+    </MetadataProvider>
+  );
+}
 
 /** dit is wat 't moet worden maar de bovenstaande is makkelijker voor testen */
 export function GisViewerResult({
@@ -92,7 +140,7 @@ export function GisViewerResult({
   dimensions,
   zoomLevelLimits,
   wrapping,
-}: GisViewerProps2): ReactElement {
+}: GisViewerPropsOLD2): ReactElement {
   // console.log({ id });
 
   return (

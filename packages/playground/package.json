@@ -6,22 +6,31 @@
   "browser": "src/index.tsx",
   "scripts": {
     "start": "webpack serve --mode development --config webpack.config.dev.js",
-    "build": "webpack --config webpack.config.prod.js"
+    "build": "webpack --config webpack.config.prod.js",
+    "build:css": "postcss style/src/index.scss -o style/dist/index.css"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
     "gis-viewer": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.11.1",
-    "@reduxjs/toolkit": "^1.9.5",
     "react-redux": "^8.0.5",
-    "redux": "^4.2.1"
+    "react-router-dom": "^6.11.1",
+    "redux": "^4.2.1",
+    "usehooks-ts": "^2.9.1"
   },
   "devDependencies": {
     "@types/react-dom": "^18.2.4",
     "css-loader": "^6.7.3",
     "html-webpack-plugin": "^5.5.1",
+    "node-sass": "^9.0.0",
+    "postcss": "^8.4.24",
+    "postcss-import": "^15.1.0",
+    "postcss-loader": "^7.3.2",
+    "postcss-nesting": "^11.2.2",
+    "sass-loader": "^13.3.1",
     "style-loader": "^3.3.2",
+    "tailwindcss": "^3.3.2",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
     "webpack": "^5.82.0",

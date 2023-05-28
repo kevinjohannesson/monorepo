@@ -1,16 +1,19 @@
+import { store } from "gis-viewer/src/gis-viewer";
+import "gis-viewer/style/dist/index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./app";
-import "./index.css";
-import "gis-viewer/style/dist/index.css";
-
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Root } from "./root";
 import { ErrorView } from "./error-view";
-import { GisViewerOsmSingleTileView } from "./experiments/gis-viewer-osm-single-tile-view";
-import { GisViewerTiledView } from "./experiments/gis-viewer-osm-tiled-view";
-import { GisViewerOsmSingleVsTiledView } from "./experiments/gis-viewer-osm-single-vs-tiled-view";
-import { GisViewerLargeScreenView } from "./experiments/gis-viewer-large-screen";
+import { GisViewerGenericSlippyMapView } from "./experiments/gis-viewer-generic-slippy-map";
+import { MasterSlaveFeature } from "./features/master-slave";
+import { StaticSlippyMapFeature } from "./features/static-slippy-map";
+// import "./index.css";
+import { Root } from "./root";
+import "./style/index.scss";
+import { NavigationControlsFeature } from "./features/navigation-controls";
+import { MouseInteractionsFeature } from "./features/mouse-interactions";
+import { MapInfoItemsFeature } from "./features/map-info-items";
 
 const router = createBrowserRouter([
   {
@@ -20,52 +23,31 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <GisViewerLargeScreenView />,
+        element: <StaticSlippyMapFeature />,
       },
       {
-        path: "experiments/osm-single-tile",
-        element: <GisViewerOsmSingleTileView />,
+        path: "features/static-slippy-map",
+        element: <StaticSlippyMapFeature />,
       },
       {
-        path: "experiments/osm-tiled",
-        element: <GisViewerTiledView />,
+        path: "features/navigation-controls",
+        element: <NavigationControlsFeature />,
       },
       {
-        path: "experiments/osm-single-vs-tiled",
-        element: <GisViewerOsmSingleVsTiledView />,
+        path: "features/mouse-interactions",
+        element: <MouseInteractionsFeature />,
       },
       {
-        path: "experiments/osm-large-screen",
-        element: <GisViewerLargeScreenView />,
+        path: "features/map-info-items",
+        element: <MapInfoItemsFeature />,
+      },
+      {
+        path: "features/master-slave",
+        element: <MasterSlaveFeature />,
       },
     ],
   },
 ]);
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <Root />,
-//     errorElement: <ErrorView />,
-//     children: [
-//       {
-//         path: "experiments/osm-single-tile",
-//         element: <GisViewerOsmSingleTileView />,
-//       },
-//       {
-//         path: "experiments/osm-tiled",
-//         element: <GisViewerTiledView />,
-//       },
-//       {
-//         path: "experiments/osm-single-vs-tiled",
-//         element: <GisViewerOsmSingleVsTiledView />,
-//       },
-//       {
-//         path: "experiments/osm-large-screen",
-//         element: <GisViewerLargeScreenView />,
-//       },
-//     ],
-//   },
-// ]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -73,6 +55,8 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </React.StrictMode>
 );

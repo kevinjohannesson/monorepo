@@ -99,23 +99,19 @@ const PanDownButton = memo(function ({ isDisabled }: ButtonControlProps) {
 PanDownButton.displayName = "PanDownButton";
 
 function CenterCoordinateTooltip(): ReactElement {
-  const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate"),
-  );
+  const centerCoordinate = useGisViewerSelector(selectViewState("centerCoordinate"));
 
   return (
     <div className="tooltip-content flex flex-col">
       <div>{"Center coordinates"}</div>
-      <div>{`x: ${Math.round(centerCoordinate[0])}, y: ${Math.round(
-        centerCoordinate[1],
-      )}`}</div>
+      <div>{`x: ${Math.round(centerCoordinate[0])}, y: ${Math.round(centerCoordinate[1])}`}</div>
     </div>
   );
 }
 
 export function PanControl(): ReactElement {
   return (
-    <div className="tooltip left">
+    <div className="tooltip right">
       <div className="control joystick w-12 h-12 grid grid-rows-3 grid-cols-2 rounded-full">
         <PanUpButton />
         <PanLeftButton />

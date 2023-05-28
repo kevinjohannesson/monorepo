@@ -1,4 +1,4 @@
-import { DEFAULT_SLICE_PREFIX, GIS_VIEWER_NAME } from "./constants";
+import { GIS_VIEWER_NAME } from "./constants";
 import {
   type UseSliceInstanceDispatch,
   type UseSliceInstanceSelector,
@@ -21,24 +21,15 @@ export const {
   slice,
   actions: { addGisViewer, removeGisViewer },
   selectors: { selectGisViewerInstance, selectGisViewerInstanceIsAvailable },
-  hooks: {
-    useGisViewerInstanceDispatchFactory,
-    useGisViewerInstanceSelectorFactory,
-  },
-} = createReduxInstance(
-  GIS_VIEWER_NAME,
-  gisViewerReducer,
-  // DEFAULT_SLICE_PREFIX,
-);
+  hooks: { useGisViewerInstanceDispatchFactory, useGisViewerInstanceSelectorFactory },
+} = createReduxInstance(GIS_VIEWER_NAME, gisViewerReducer);
 
 export const useGisViewerDispatch: UseSliceInstanceDispatch = () => {
   const { id } = useMetadataContext();
   return useGisViewerInstanceDispatchFactory(id)();
 };
 
-export const useGisViewerSelector: UseSliceInstanceSelector<GisViewerState> = (
-  selector,
-) => {
+export const useGisViewerSelector: UseSliceInstanceSelector<GisViewerState> = (selector) => {
   const { id } = useMetadataContext();
   return useGisViewerInstanceSelectorFactory(id)(selector);
 };

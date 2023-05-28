@@ -11,44 +11,6 @@ export interface ZoomInteractionProps {
   zoomDirection?: -1 | 1;
 }
 
-// export function ZoomInteraction({
-//   zoomDirection = DEFAULT_ZOOM_DIRECTION,
-// }: ZoomInteractionProps): ReactElement | null {
-//   const { ref } = useViewContext();
-//   const [cursorPosition, setCursorPosition] = useState<Coordinate | null>(null)
-
-//   const dispatch = useGisViewerDispatch();
-
-//   useEffect(() => {
-//     const element = ref.current;
-//     if (isNull(element)) return;
-
-//     const handleWheel = (event: globalThis.WheelEvent): void => {
-//       event.preventDefault();
-
-//       const delta = isTouchPadScroll(event) ? 0.1 : 0.1;
-//       const directionalDelta = zoomDirection * delta;
-
-//       dispatch(
-//         updateZoomLevel(
-//           event.deltaY < 0 ? -directionalDelta : directionalDelta,
-//         ),
-//       );
-
-//       event.stopPropagation();
-//     };
-
-//     element.addEventListener("wheel", handleWheel);
-
-//     return () => {
-//       element.removeEventListener("wheel", handleWheel);
-//     };
-//   }, []);
-
-//   if(isNull(cursorPosition)) return null;
-//   return <div>hello world</div>;
-// }
-
 export function ZoomInteraction({
   zoomDirection = DEFAULT_ZOOM_DIRECTION,
 }: ZoomInteractionProps): null {
@@ -64,13 +26,12 @@ export function ZoomInteraction({
     if (isNull(element)) return;
 
     const handleWheel = (event: globalThis.WheelEvent): void => {
-      event.preventDefault();
+      // event.preventDefault(); // Since the event is passive we have no need for this.
 
       const delta = isTouchPadScroll(event) ? 0.1 : 0.1;
       const directionalDelta = zoomDirection * delta;
 
-      zoomDelta.current +=
-        event.deltaY < 0 ? -directionalDelta : directionalDelta;
+      zoomDelta.current += event.deltaY < 0 ? -directionalDelta : directionalDelta;
 
       if (frameId.current === null) {
         frameId.current = requestAnimationFrame(() => {
@@ -83,7 +44,7 @@ export function ZoomInteraction({
       event.stopPropagation();
     };
 
-    element.addEventListener("wheel", handleWheel);
+    element.addEventListener("wheel", handleWheel, { passive: true });
 
     return () => {
       element.removeEventListener("wheel", handleWheel);

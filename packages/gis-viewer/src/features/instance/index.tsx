@@ -1,9 +1,5 @@
 import { type ReactElement, type ReactNode, useEffect } from "react";
-import {
-  addGisViewer,
-  removeGisViewer,
-  selectGisViewerInstanceIsAvailable,
-} from "../../slice";
+import { addGisViewer, removeGisViewer, selectGisViewerInstanceIsAvailable } from "../../slice";
 import { useDispatch, useSelector } from "react-redux";
 import { useMetadataContext } from "../../meta-data";
 
@@ -35,9 +31,7 @@ interface InstanceProps {
   children?: ReactNode;
 }
 
-export function GisViewerInstance({
-  children = null,
-}: InstanceProps): ReactElement {
+export function GisViewerInstance({ children = null }: InstanceProps): ReactElement {
   const { id } = useMetadataContext();
 
   const isAvailable = useSelector(selectGisViewerInstanceIsAvailable(id));

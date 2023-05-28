@@ -148,8 +148,12 @@ export function OsmTileRenderer(): ReactElement {
   const viewCenterCoordinate = useViewCenterCoordinate();
 
   // Obtain dimensional and offset data related to the tile grid.
-  const { gridTileIndices, gridTileDimensions, pixelOffsetToCenterGrid, gridDimensions } =
-    useTileGridContext();
+  const {
+    indices: gridTileIndices,
+    gridTileDimensions,
+    pixelOffsetToCenterGrid,
+    dimensions: gridDimensions,
+  } = useTileGridContext();
   const [pixelOffsetToCenterGridX, pixelOffsetToCenterGridY] = pixelOffsetToCenterGrid;
   const [gridWidth, gridHeight] = gridDimensions;
 

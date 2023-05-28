@@ -1,10 +1,6 @@
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { type ReactElement, memo } from "react";
-import {
-  selectViewState,
-  selectZoomLevel,
-  updateZoomLevelToClosestInteger,
-} from "../view/slice";
+import { selectViewState, selectZoomLevel, updateZoomLevelToClosestInteger } from "../view/slice";
 import { useGisViewerDispatch, useGisViewerSelector } from "../../slice";
 
 interface ButtonControlProps {
@@ -19,11 +15,7 @@ const ZoomInButton = memo(function ({ isDisabled }: ButtonControlProps) {
   };
 
   return (
-    <button
-      className="control button"
-      disabled={isDisabled}
-      onClick={handleClick(1)}
-    >
+    <button className="control button" disabled={isDisabled} onClick={handleClick(1)}>
       <AiOutlinePlus />
     </button>
   );
@@ -38,11 +30,7 @@ const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
   };
 
   return (
-    <button
-      className="control button"
-      disabled={isDisabled}
-      onClick={handleClick(-1)}
-    >
+    <button className="control button" disabled={isDisabled} onClick={handleClick(-1)}>
       <AiOutlineMinus />
     </button>
   );
@@ -50,9 +38,7 @@ const ZoomOutButton = memo(function ({ isDisabled }: ButtonControlProps) {
 ZoomOutButton.displayName = "ZoomOutButton";
 
 export function ZoomControl(): ReactElement {
-  const [minZoomLevel, maxZoomLevel] = useGisViewerSelector(
-    selectViewState("zoomLevelLimits"),
-  );
+  const [minZoomLevel, maxZoomLevel] = useGisViewerSelector(selectViewState("zoomLevelLimits"));
 
   const zoomLevel = useGisViewerSelector(selectZoomLevel);
 
@@ -60,7 +46,7 @@ export function ZoomControl(): ReactElement {
   const isZoomOutDisabled = zoomLevel <= minZoomLevel;
 
   return (
-    <div className="tooltip left flex flex-col items-end gap-2">
+    <div className="tooltip right flex flex-col items-end gap-2">
       <ZoomInButton isDisabled={isZoomInDisabled} />
       <ZoomOutButton isDisabled={isZoomOutDisabled} />
       <span className="tooltip-content whitespace-nowrap">

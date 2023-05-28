@@ -1,23 +1,25 @@
 import {
   type ReactElement,
   type ReactNode,
+  type Reducer,
   createContext,
   useCallback,
   useMemo,
   useReducer,
 } from "react";
-import { type Vector2d, useRequiredContext } from "utils";
+import { type Vector2d, isNull, useRequiredContext } from "utils";
 
 // const CACHE_SIZE_LIMIT = 100;
 
 type TileImageCache = Record<number, Record<number, Record<number, HTMLImageElement>>>;
 
-interface TileImageCacheState {
+type TileImageCacheState = WithVersion<{
   availableImageTiles: TileImageCache;
-}
-const TILE_IMAGE_CACHE_INITIAL_STATE: TileImageCacheState = {
+}>;
+
+const TILE_IMAGE_CACHE_INITIAL_STATE: TileImageCacheState = withVersioning({
   availableImageTiles: {},
-};
+});
 
 const ADD_IMAGE = "ADD_IMAGE" as const;
 
@@ -27,6 +29,44 @@ interface AddTileImageToCacheAction {
 }
 
 type TileImageCacheActions = AddTileImageToCacheAction;
+
+interface Action<T = string> {
+  type: T;
+}
+
+interface VersionState {
+  version: number;
+}
+
+type WithVersion<S> = S & VersionState;
+
+function withVersioning<S>(state: S): WithVersion<S> {
+  return { ...state, version: 0 };
+}
+
+function enhanceVersion<S extends VersionState>(state: S): S {
+  return { ...state, version: state.version + 1 };
+}
+
+function withVersioningEnhancer<S extends VersionState, A extends Action>(
+  reducer: Reducer<S, A>,
+  versionedActionTypes: Array<A["type"]>,
+) {
+  return function (state: S, action: A): WithVersion<S> {
+    const shouldUpdateVersion = versionedActionTypes.includes(action.type);
+    const updatedState = reducer(state, action);
+
+    if (shouldUpdateVersion) {
+      return enhanceVersion({ ...updatedState });
+    } else {
+      return { ...updatedState };
+    }
+  };
+}
+
+function selectVersion<S extends VersionState>(state: S): VersionState["version"] {
+  return state.version;
+}
 
 function tileImageCacheReducer(
   state: TileImageCacheState,
@@ -48,6 +88,7 @@ function tileImageCacheReducer(
       };
       // Cleanup logic to limit the cache here...
 
+      // return enhanceVersion({ ...state, availableImageTiles });
       return { ...state, availableImageTiles };
     }
     default:
@@ -143,6 +184,8 @@ function selectZoomLevelsWithImageInCacheForReferenceTile(
 interface UseTileImageCache {
   addTileImage: (image: HTMLImageElement, x: number, y: number, z: number) => void;
   getTileImage: (x: number, y: number, z: number) => HTMLImageElement | null;
+  hasTileImage: (x: number, y: number, z: number) => boolean;
+  version: TileImageCacheState["version"];
   availableZoomLevels: number[];
   getAvailableZoomLevelsByReferenceTile: (
     referenceTile: ReferenceTile,
@@ -155,7 +198,10 @@ interface UseTileImageCache {
 export function useTileImageCacheReducer(
   initialState: TileImageCacheState = TILE_IMAGE_CACHE_INITIAL_STATE,
 ): UseTileImageCache {
-  const [state, dispatch] = useReducer(tileImageCacheReducer, initialState);
+  const [state, dispatch] = useReducer(
+    withVersioningEnhancer(tileImageCacheReducer, [ADD_IMAGE]),
+    initialState,
+  );
 
   const addTileImage = useCallback((image: HTMLImageElement, x: number, y: number, z: number) => {
     dispatch(addTileImageToCache(image, x, y, z));
@@ -163,6 +209,12 @@ export function useTileImageCacheReducer(
 
   const getTileImage = useCallback(
     (x: number, y: number, z: number) => selectTileImageFromCache(state, x, y, z),
+
+    [state],
+  );
+
+  const hasTileImage = useCallback(
+    (x: number, y: number, z: number) => !isNull(selectTileImageFromCache(state, x, y, z)),
 
     [state],
   );
@@ -179,9 +231,13 @@ export function useTileImageCacheReducer(
     [Object.keys(state.availableImageTiles).join()],
   );
 
+  const version = useMemo(() => selectVersion(state), [state.version]);
+
   return {
     addTileImage,
+    hasTileImage,
     getTileImage,
+    version,
     availableZoomLevels,
     getAvailableZoomLevelsByReferenceTile,
     state,
@@ -198,7 +254,9 @@ interface TileImageCacheProviderProps {
 export function TileImageCacheProvider({ children }: TileImageCacheProviderProps): ReactElement {
   const {
     addTileImage,
+    hasTileImage,
     getTileImage,
+    version,
     availableZoomLevels,
     state,
     getAvailableZoomLevelsByReferenceTile,
@@ -207,7 +265,9 @@ export function TileImageCacheProvider({ children }: TileImageCacheProviderProps
   const value = useMemo(
     () => ({
       addTileImage,
+      hasTileImage,
       getTileImage,
+      version,
       availableZoomLevels,
       state,
       getAvailableZoomLevelsByReferenceTile,

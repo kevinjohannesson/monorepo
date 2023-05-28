@@ -5,36 +5,38 @@ import { usePixelOffsetToCenterGrid } from "./hooks/use-pixel-offset-to-center-g
 
 interface TileGridContextValue {
   pixelOffsetToCenterGrid: Vector2d;
-  gridTileIndices: Vector2d[];
+  indices: Vector2d[];
   gridTileDimensions: Vector2d;
-  gridDimensions: Vector2d;
+  dimensions: Vector2d;
 }
 
 const TileGridContext = createContext<TileGridContextValue>({} as any);
 
 export interface TileGridProviderProps {
-  gridDimensions: Vector2d;
+  dimensions: Vector2d;
   tileDimensions: Vector2d | number;
+  additionalRings?: number;
   children?: ReactNode;
 }
 
 export function TileGridProvider({
-  gridDimensions,
+  dimensions,
   tileDimensions,
+  additionalRings,
   children,
 }: TileGridProviderProps): ReactElement | null {
   const pixelOffsetToCenterGrid = usePixelOffsetToCenterGrid(
-    gridDimensions,
+    dimensions,
     ensureVector2d(tileDimensions),
   );
 
-  const gridTileIndices = useGridTileIndices(gridDimensions, ensureVector2d(tileDimensions));
+  const indices = useGridTileIndices(dimensions, ensureVector2d(tileDimensions), additionalRings);
 
   const gridTileDimensions = ensureVector2d(tileDimensions);
   const value: TileGridContextValue = useMemo(
     () => ({
       pixelOffsetToCenterGrid,
-      gridTileIndices,
+      indices,
       // /** @todo remove the test values */
       // gridTileIndices: [
       //   // [-1, -1],
@@ -50,9 +52,9 @@ export function TileGridProvider({
       //   // [1, 1],
       // ],
       gridTileDimensions,
-      gridDimensions,
+      dimensions,
     }),
-    [pixelOffsetToCenterGrid, gridTileIndices, gridTileDimensions.join()],
+    [pixelOffsetToCenterGrid, indices, gridTileDimensions.join()],
   );
 
   return <TileGridContext.Provider value={value}>{children}</TileGridContext.Provider>;

@@ -8,7 +8,11 @@ export {
   isHighestNumber,
 } from "./src/assert";
 export { deg2rad, rad2deg } from "./src/convert";
-export { getClosestNumberFrom, getClosestNumberTo } from "./src/number";
+export {
+  getClosestNumberFrom,
+  getClosestNumberTo,
+  getClosestHigherNumberFrom,
+} from "./src/number";
 export {
   capitalize,
   uncapitalize,

@@ -1,0 +1,200 @@
+import * as SlippyTileUtils from "./slippy-tile-utils";
+import { type ReactElement, useEffect } from "react";
+import { SimpleImageFetcher } from "./slippy-map-simple-fetcher";
+import { TileImageCacheProvider, useTileImageCacheContext } from "../../cache/tile-image-cache";
+import { type Vector2d, assertNotNull, getClosestNumberFrom, isNull } from "utils";
+import { calculateZoomAdjustedTileSize } from "./slippy-grid-utils";
+import { isEmpty } from "lodash";
+import { useEffectiveTileSize, useEffectiveZoomLevel } from "./slippy-map-hooks";
+import { useLayerContext } from "../../layer";
+import {
+  useViewCenterCoordinate,
+  useViewDimensions,
+  useViewProjection,
+} from "../../view/hooks/use-view-state";
+
+interface SlippyMapSourceProps {
+  url?: string;
+  tileSize?: number;
+}
+
+export function SlippyMapSource({ tileSize = 256, url }: SlippyMapSourceProps): ReactElement {
+  const viewDimensions = useViewDimensions();
+
+  const effectiveTileSize = useEffectiveTileSize(tileSize);
+  const gridTileOffsets = generateGridTileOffsets(viewDimensions, effectiveTileSize);
+
+  return (
+    <TileImageCacheProvider>
+      <SimpleImageFetcher tileOffsets={gridTileOffsets} tileSize={effectiveTileSize} url={url} />
+      <GridRenderer tileSize={effectiveTileSize} />
+    </TileImageCacheProvider>
+  );
+}
+
+function generateGridTileOffsets([width, height]: Vector2d, tileSize: number): Vector2d[] {
+  const halfGridTileCountX = Math.ceil(width / 2 / tileSize);
+  const halfGridTileCountY = Math.ceil(height / 2 / tileSize);
+
+  const gridTiles: Vector2d[] = [];
+
+  for (let x = -halfGridTileCountX; x <= halfGridTileCountX; x++) {
+    for (let y = -halfGridTileCountY; y <= halfGridTileCountY; y++) {
+      gridTiles.push([x, y]);
+    }
+  }
+
+  return gridTiles;
+}
+
+function calculateRenderingOrigin([width, height]: Vector2d, tileSize: number): Vector2d {
+  const originOffset = 0; // -tileSize / 2;
+  const originX = originOffset + width / 2;
+  const originY = originOffset + height / 2;
+
+  return [originX, originY];
+}
+
+const COLORS = [
+  ["#012030", "#13678A"],
+  ["#45C4B0", "#9AEBA3"],
+  ["#348888", "#22BABB"],
+  ["#F24405", "#FA7F08"],
+  ["#103778", "#0593A2"],
+  ["#E3371E", "#FF7A48"],
+  ["#146152", "#44803F"],
+  ["#44803F", "#B4CF66"],
+  ["#FF5A33", "#FFEC5C"],
+  ["#C37EDB", "#FC8DCA"],
+  ["#B7A6F6", "#C37EDB"],
+  ["#88A3E2", "#AAECFC"],
+  ["#95BFA4", "#FFF8EE"],
+  ["#F2889B", "#FFF8EE"],
+  ["#F28444", "#F29E38"],
+  ["#95BFA4", "#F28444"],
+  ["#8704BF", "#BF04B3"],
+  ["#04BF20", "#F2CB05"],
+  ["#FF4858", "#00CCC0"],
+];
+
+interface GridRendererProps {
+  tileSize: number;
+}
+
+function GridRenderer({ tileSize: originalTileSize }: GridRendererProps): null {
+  const viewDimensions = useViewDimensions();
+  const viewProjection = useViewProjection();
+  const viewCenterCoordinate = useViewCenterCoordinate();
+  const effectiveZoomLevel = useEffectiveZoomLevel(originalTileSize);
+
+  const layer = useLayerContext();
+
+  const cache = useTileImageCacheContext();
+
+  useEffect(() => {
+    const offscreenCanvas = new OffscreenCanvas(viewDimensions[0], viewDimensions[1]);
+    const offscreenCtx = offscreenCanvas.getContext("2d");
+    assertNotNull(offscreenCtx);
+
+    cache.availableZoomLevels.forEach((cacheZoomLevel) => {
+      const zoomAdjustedTileSize = calculateZoomAdjustedTileSize(
+        originalTileSize,
+        cacheZoomLevel,
+        effectiveZoomLevel,
+      );
+      const renderOrigin: Vector2d = calculateRenderingOrigin(viewDimensions, zoomAdjustedTileSize);
+
+      const viewCenterTilePosition = SlippyTileUtils.calculatePositionFromProjectedSource(
+        viewCenterCoordinate,
+        viewProjection.code,
+        cacheZoomLevel,
+      );
+
+      const viewCenterOffset = viewCenterTilePosition.map((p) => (p % 1) * zoomAdjustedTileSize);
+
+      const gridTileOffsets = generateGridTileOffsets(viewDimensions, zoomAdjustedTileSize);
+
+      gridTileOffsets.forEach((index: Vector2d) => {
+        const tilePositionX = viewCenterTilePosition[0] + index[0];
+        const tilePositionY = viewCenterTilePosition[1] + index[1];
+
+        const [tileNumbersX, tileNumbersY] = SlippyTileUtils.toTileNumbers([
+          tilePositionX,
+          tilePositionY,
+        ]);
+
+        const hasValidUrlParameters = SlippyTileUtils.isValidUrlParameters(
+          tileNumbersX,
+          tileNumbersY,
+          cacheZoomLevel,
+        );
+
+        const hasImageAvailable = cache.hasTileImage(tileNumbersX, tileNumbersY, cacheZoomLevel);
+
+        if (!hasValidUrlParameters) {
+          return;
+        }
+
+        if (!hasImageAvailable) {
+          return;
+        }
+
+        const availableZoomLevelsForIndex = isEmpty(cache.availableZoomLevels)
+          ? []
+          : cache.availableZoomLevels.reduce<number[]>((zoomLevels, z) => {
+              const [x, y] = SlippyTileUtils.calculateTileNumbersAtDifferentZoomLevel(
+                { position: [tilePositionX, tilePositionY], zoomLevel: cacheZoomLevel },
+                z,
+              );
+              if (cache.hasTileImage(x, y, z)) return [...zoomLevels, z];
+              return zoomLevels;
+            }, []);
+
+        const isTooHighZoomLevel = cacheZoomLevel > effectiveZoomLevel;
+
+        const isClosestAvailableZoomLevel = isEmpty(availableZoomLevelsForIndex)
+          ? false
+          : getClosestNumberFrom(availableZoomLevelsForIndex, effectiveZoomLevel) ===
+            cacheZoomLevel;
+
+        if (isTooHighZoomLevel && !isClosestAvailableZoomLevel) {
+          return;
+        }
+
+        const dx = renderOrigin[0] - viewCenterOffset[0] + index[0] * zoomAdjustedTileSize;
+        const dy = renderOrigin[1] - viewCenterOffset[1] + index[1] * zoomAdjustedTileSize;
+        const ds = zoomAdjustedTileSize;
+
+        const isTileOutOfVisibleCanvas =
+          dx + ds < 0 || dy + ds < 0 || dx > viewDimensions[0] || dy > viewDimensions[1];
+
+        if (isTileOutOfVisibleCanvas) {
+          return;
+        }
+
+        const image = cache.getTileImage(tileNumbersX, tileNumbersY, cacheZoomLevel);
+        if (isNull(image)) return;
+
+        offscreenCtx.fillStyle = COLORS[cacheZoomLevel][0];
+        // offscreenCtx.fillRect(dx, dy, ds, ds);
+        offscreenCtx.drawImage(image, dx, dy, ds, ds);
+        offscreenCtx.strokeStyle = COLORS[cacheZoomLevel][1];
+        offscreenCtx.strokeRect(dx, dy, ds, ds);
+      });
+    });
+
+    const layerCtx = layer.ref.current?.getContext("2d");
+    assertNotNull(layerCtx);
+
+    layerCtx.clearRect(0, 0, viewDimensions[0], viewDimensions[1]);
+    layerCtx.drawImage(offscreenCanvas, 0, 0, viewDimensions[0], viewDimensions[1]);
+  }, [
+    effectiveZoomLevel,
+    cache.availableZoomLevels.join(),
+    cache.version,
+    viewDimensions.join(),
+    viewCenterCoordinate.join(),
+    viewProjection.code,
+  ]);
+  return null;
+}

@@ -240,12 +240,10 @@ i {
 
 #detail {
   flex: 1;
-  padding: 2rem 4rem;
   width: 100%;
   height: 100%;
-  display: grid;
+  display: flex;
   place-content: center;
-  gap: 2rem;
 }
 
 #detail.loading {

@@ -23,16 +23,10 @@ export function CursorCoordinatesMapInfoItem({
   const { ref } = useViewContext();
 
   const dimensions = useGisViewerSelector(selectViewState("dimensions"));
-  const currentResolution = useGisViewerSelector(
-    selectViewState("currentResolution"),
-  );
-  const centerCoordinate = useGisViewerSelector(
-    selectViewState("centerCoordinate"),
-  );
+  const currentResolution = useGisViewerSelector(selectViewState("currentResolution"));
+  const centerCoordinate = useGisViewerSelector(selectViewState("centerCoordinate"));
 
-  const [cursorCoordinate, setCursorCoordinate] = useState<Coordinate | null>(
-    null,
-  );
+  const [cursorCoordinate, setCursorCoordinate] = useState<Coordinate | null>(null);
 
   useEffect(() => {
     const element = ref.current;
@@ -45,10 +39,7 @@ export function CursorCoordinatesMapInfoItem({
           Math.max(e.offsetY, 0),
         ];
 
-        const viewCenterPixelCoordinate: Coordinate = divideVector2d(
-          dimensions,
-          2,
-        );
+        const viewCenterPixelCoordinate: Coordinate = divideVector2d(dimensions, 2);
 
         const cursorOffsetFromViewCenter: Coordinate = subtractVector2d(
           cursorPixelCoordinateInView,
@@ -66,9 +57,7 @@ export function CursorCoordinatesMapInfoItem({
         );
 
         frameRef.current = requestAnimationFrame(() => {
-          setCursorCoordinate(
-            cursorProjectedCoordinate.map(Math.round) as Coordinate,
-          );
+          setCursorCoordinate(cursorProjectedCoordinate.map(Math.round) as Coordinate);
           frameRef.current = null;
         });
       }
@@ -107,9 +96,9 @@ export function CursorCoordinatesMapInfoItem({
 
   return (
     <div
-      className={`flex gap-2 items-center text-sm ${
-        cursorCoordinate != null ? "font-mono" : ""
-      } ${isNull(cursorCoordinate) ? "text-slate-400" : "text-slate-700"} z-10`}
+      className={`flex gap-2 items-center text-sm ${cursorCoordinate != null ? "font-mono" : ""} ${
+        isNull(cursorCoordinate) ? "text-slate-400" : "text-slate-700"
+      } z-10`}
     >
       <MdOutlineMouse />
       <span>{coordinatesOrPlaceholder}</span>

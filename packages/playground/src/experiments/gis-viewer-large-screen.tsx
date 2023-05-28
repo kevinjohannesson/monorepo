@@ -49,8 +49,8 @@ export function GisViewerLargeScreenView() {
         id={"refactored"}
         initialCenterCoordinate={initialCenterCoordinate}
         initialZoomLevel={initialZoomLevel}
-        dimensions={[1200, 700]}
-        zoomLevelLimits={[-2, 16]}
+        dimensions={[700, 400]}
+        zoomLevelLimits={[-2, 35]}
         wrapping={{
           isWrappedX: false,
           isWrappedY: false,
@@ -59,6 +59,28 @@ export function GisViewerLargeScreenView() {
         <LayersContainer>
           <Layer>
             <OsmSource />
+          </Layer>
+
+          <Layer>
+            <CrosshairSource />
+          </Layer>
+        </LayersContainer>
+      </GisViewerResult>
+      <h3>Single tile reference</h3>
+      <GisViewerResult
+        id={"refactored"}
+        initialCenterCoordinate={initialCenterCoordinate}
+        initialZoomLevel={initialZoomLevel}
+        dimensions={[700, 400]}
+        zoomLevelLimits={[-2, 35]}
+        wrapping={{
+          isWrappedX: false,
+          isWrappedY: false,
+        }}
+      >
+        <LayersContainer>
+          <Layer>
+            <OsmSingleTileSource />
           </Layer>
 
           <Layer>

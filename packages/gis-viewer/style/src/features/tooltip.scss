@@ -2,6 +2,7 @@
   @apply relative;
 
   & > .tooltip-content {
+    @apply z-50;
     @apply invisible absolute  px-2 py-1 rounded bg-slate-700/[.9] text-white whitespace-nowrap;
   }
 

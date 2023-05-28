@@ -1,5 +1,5 @@
 import { type Coordinate, type Dimensions } from "../../../../types";
-import { type Vector2d, deg2rad } from "utils";
+import { type Vector2d, deg2rad, multiplyVector2d } from "utils";
 import proj4 from "proj4";
 
 export const TILE_SIZE = 256;
@@ -128,4 +128,21 @@ export function toWholeTileNumbers(fractionalTileNumbers: Vector2d): Vector2d {
 
 export function toWholeZoomLevel(fractionalZoomLevel: number): number {
   return Math.floor(fractionalZoomLevel);
+}
+
+export function calculateZoomLevelScaleFactor(
+  originalZoomLevel: number,
+  targetZoomLevel: number,
+): number {
+  const zoomDifference = targetZoomLevel - originalZoomLevel;
+  return Math.pow(2, zoomDifference);
+}
+
+export function calculateZoomAdjustedTileDimensions(
+  tileDimensions: Vector2d,
+  originalZoomLevel: number,
+  targetZoomLevel: number,
+): Vector2d {
+  const scaleFactor = calculateZoomLevelScaleFactor(originalZoomLevel, targetZoomLevel);
+  return multiplyVector2d(scaleFactor, tileDimensions);
 }

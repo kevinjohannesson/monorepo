@@ -90,3 +90,20 @@ export function View({
     </ViewContext.Provider>
   );
 }
+
+export function ViewMirror({
+  children = null,
+  dimensions = DEFAULT_DIMENSIONS,
+}: ViewProps): ReactElement {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  const isInitialized = useGisViewerSelector(selectIsInitialized);
+
+  return (
+    <ViewContext.Provider value={{ ref }}>
+      <ViewContainer ref={ref} dimensions={dimensions}>
+        {isInitialized ? children : null}
+      </ViewContainer>
+    </ViewContext.Provider>
+  );
+}

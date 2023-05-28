@@ -323,7 +323,11 @@ export function OsmSource(): ReactElement {
   const osmBaseTileSize = useOsmBaseTileSize();
 
   return (
-    <TileGridProvider gridDimensions={viewDimensions} tileDimensions={osmBaseTileSize}>
+    <TileGridProvider
+      dimensions={viewDimensions}
+      tileDimensions={osmBaseTileSize}
+      additionalRings={2}
+    >
       <TileImageCacheProviderNew>
         <OsmTileImageFetcher />
         <OsmTileRenderer />

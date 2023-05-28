@@ -1,1 +1,1 @@
-export { GisViewer } from "./src/gis-viewer";
+export { GisViewerOLD as GisViewer } from "./src/gis-viewer";

@@ -190,12 +190,7 @@ export function PanInteraction(): null {
 
       if (frameId.current === null) {
         frameId.current = requestAnimationFrame(() => {
-          dispatch(
-            updateCenterCoordinateByPixel([
-              -movementX.current,
-              movementY.current,
-            ]),
-          );
+          dispatch(updateCenterCoordinateByPixel([-movementX.current, movementY.current]));
           movementX.current = 0;
           movementY.current = 0;
           frameId.current = null;
