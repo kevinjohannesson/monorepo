@@ -15,5 +15,8 @@ export const useViewProjection = (): Projection =>
 export const useViewCenterCoordinate = (): Coordinate =>
   useGisViewerSelector(selectViewState("centerCoordinate"));
 
+export const useViewCurrentResolution = (): number =>
+  useGisViewerSelector(selectViewState("currentResolution"));
+
 export const useViewZoomLevel = (): number =>
   Number((useGisViewerSelector(selectZoomLevel) + EPSILON).toFixed(5));

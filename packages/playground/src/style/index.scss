@@ -12,6 +12,8 @@ body,
 #root {
   @apply w-full h-full;
   @apply flex p-0 m-0;
+
+  overflow: hidden;
 }
 
 #sidebar {
@@ -84,4 +86,5 @@ i {
   height: 100%;
   display: flex;
   place-content: center;
+  overflow: hidden;
 }

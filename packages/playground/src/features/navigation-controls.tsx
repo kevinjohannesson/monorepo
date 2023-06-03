@@ -9,7 +9,7 @@ import { SlippyMapSource } from "gis-viewer/src/features/source/slippy-map/slipp
 import { GisViewer } from "gis-viewer/src/gis-viewer";
 import { useElementSize } from "usehooks-ts";
 import { Vector2d } from "utils";
-import { OsmAttribution } from "../components/osm-attribution";
+import { OsmAttribution } from "gis-viewer/src/features/map-info/osm-attribution";
 
 const MASTER_ID = "MASTER";
 const INITIAL_ZOOM_LEVEL = 5;

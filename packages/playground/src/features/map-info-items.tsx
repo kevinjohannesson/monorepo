@@ -9,7 +9,7 @@ import { SlippyMapSource } from "gis-viewer/src/features/source/slippy-map/slipp
 import { GisViewer } from "gis-viewer/src/gis-viewer";
 import { useElementSize } from "usehooks-ts";
 import { Vector2d } from "utils";
-import { OsmAttribution } from "../components/osm-attribution";
+import { OsmAttribution } from "gis-viewer/src/features/map-info/osm-attribution";
 import { ZoomLevelInfoItem } from "gis-viewer/src/features/map-info/zoom-level-info-item";
 import { CursorCoordinatesMapInfoItem } from "gis-viewer/src/features/map-info/cursor-coordinates-map-info-item";
 import { ViewCenterCoordinatesMapInfoItem } from "../../../gis-viewer/src/features/map-info/view-center-coordinates-map-info-item";

@@ -10,11 +10,12 @@ import {
 import { type GisViewerState } from "../../slice";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { type Projection } from "../projections";
-import { addVector2d, multiplyVector2d } from "utils";
+import { type Vector2d, addVector2d, multiplyVector2d } from "utils";
 import {
   calculateBaseResolution,
   calculateResolutionFromZoomLevel,
 } from "./utils/resolution-utils";
+import { calculateProjectedExtent } from "./hooks/use-view-extent";
 import {
   calculateUpdatedZoomLevel,
   calculateZoomLevelFromResolution,
@@ -117,6 +118,68 @@ export const viewSlice = createSlice({
       }
     },
 
+    // This action handler updates the zoom level while preserving the position of a specified point on the map.
+    // It begins by calculating the map coordinates corresponding to the specified point (pixelOriginForZoom) in the map's current resolution.
+    // Then, it computes what the new zoom level and resolution would be based on the requested change in zoom level (deltaZoom).
+    // If the updated zoom level falls within the allowed limits, it proceeds to calculate what map coordinates the specified point would correspond to in the new resolution.
+    // Lastly, it calculates the shift in map coordinates that the specified point undergoes between the current resolution and the new resolution.
+    // This shift is used to adjust the center coordinate of the map view, ensuring that the specified point retains its original position on the screen during the zoom operation.
+    updateZoomLevelPreservingPointPosition: (
+      state,
+      {
+        payload: { deltaZoom, pixelOriginForZoom },
+      }: PayloadAction<{ deltaZoom: number; pixelOriginForZoom: Vector2d }>,
+    ) => {
+      const {
+        centerCoordinate,
+        currentResolution,
+        zoomLevelLimits,
+        projection: { projectedExtent },
+        dimensions,
+      } = state;
+
+      const currentViewExtent = calculateProjectedExtent(
+        centerCoordinate,
+        currentResolution,
+        dimensions,
+      );
+
+      const pointInCurrentResolution = [
+        currentViewExtent[0] + pixelOriginForZoom[0] * currentResolution,
+        currentViewExtent[1] + pixelOriginForZoom[1] * currentResolution,
+      ];
+
+      const baseResolution = calculateBaseResolution(projectedExtent, dimensions);
+
+      const updatedZoomLevel = calculateUpdatedZoomLevel(
+        baseResolution,
+        currentResolution,
+        deltaZoom,
+      );
+
+      if (isZoomLevelWithinLimits(updatedZoomLevel, zoomLevelLimits)) {
+        const newResolution = calculateResolutionFromZoomLevel(baseResolution, updatedZoomLevel);
+
+        const newViewExtent = calculateProjectedExtent(centerCoordinate, newResolution, dimensions);
+
+        const pointInNewResolution = [
+          newViewExtent[0] + pixelOriginForZoom[0] * newResolution,
+          newViewExtent[1] + pixelOriginForZoom[1] * newResolution,
+        ];
+
+        const shiftInCoordinates: Vector2d = [
+          pointInCurrentResolution[0] - pointInNewResolution[0],
+          pointInCurrentResolution[1] - pointInNewResolution[1],
+        ];
+
+        state.currentResolution = newResolution;
+        state.centerCoordinate = [
+          state.centerCoordinate[0] + shiftInCoordinates[0],
+          state.centerCoordinate[1] - shiftInCoordinates[1],
+        ];
+      }
+    },
+
     updateZoomLevel: (state, { payload: deltaZoom }: PayloadAction<number>) => {
       const {
         currentResolution,
@@ -182,6 +245,7 @@ export const {
   updateCenterCoordinateByPixel,
   updateZoomLevel,
   setIsInitialized,
+  updateZoomLevelPreservingPointPosition,
 } = viewSlice.actions;
 
 export const selectViewState =

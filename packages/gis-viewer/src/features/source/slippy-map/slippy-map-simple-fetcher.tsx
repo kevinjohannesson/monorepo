@@ -1,9 +1,9 @@
-import * as SlippyGridUtils from "./slippy-grid-utils";
-import * as SlippyTileUtils from "./slippy-tile-utils";
+import * as SlippyMapGridUtils from "./slippy-map-grid-utils";
+import * as SlippyMapTileUtils from "./slippy-map-tile-utils";
 import { addVector2d } from "utils";
 import { useEffect } from "react";
 import { useEffectiveZoomLevel } from "./slippy-map-hooks";
-import { useTileImageCacheContext } from "../../cache/tile-image-cache";
+import { useSlippyMapCacheContext } from "./slippy-map-cache";
 import {
   useViewCenterCoordinate,
   useViewDimensions,
@@ -24,11 +24,12 @@ export function SimpleImageFetcher({
   url = "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 }: SimpleImageFetcherProps): null {
   const viewDimensions = useViewDimensions();
-  const cache = useTileImageCacheContext();
+
+  const cache = useSlippyMapCacheContext();
 
   const effectiveZoomLevel = useEffectiveZoomLevel(tileSize);
 
-  const tileOffsets = SlippyGridUtils.generateTileOffsets(viewDimensions, tileSize);
+  const tileOffsets = SlippyMapGridUtils.generateTileOffsets(viewDimensions, tileSize);
 
   const z = Math.min(
     Math.max(Math.floor(effectiveZoomLevel), lowestAvailableZoomLevel),
@@ -38,8 +39,8 @@ export function SimpleImageFetcher({
   const viewCenterCoordinate = useViewCenterCoordinate();
   const viewProjection = useViewProjection();
 
-  const centerTileNumbers = SlippyTileUtils.toTileNumbers(
-    SlippyTileUtils.calculatePositionFromProjectedSource(
+  const centerTileNumbers = SlippyMapTileUtils.toTileNumbers(
+    SlippyMapTileUtils.calculatePositionFromProjectedSource(
       viewCenterCoordinate,
       viewProjection.code,
       z,
@@ -65,8 +66,9 @@ export function SimpleImageFetcher({
         // }, delay);
         // timeouts.push(timeoutId);
       };
-      if (SlippyTileUtils.isValidUrlParameters(x, y, z)) {
-        image.src = SlippyTileUtils.createTileUrl(url, x, y, z);
+      if (SlippyMapTileUtils.isValidUrlParameters(x, y, z)) {
+        image.crossOrigin = "anonymous";
+        image.src = SlippyMapTileUtils.createTileUrl(url, x, y, z);
         images.push(image);
       }
     });

@@ -42,13 +42,24 @@ export function Root() {
             </li>
 
             <li className="tooltip right">
-              <Link to={`features/map-info-items`}>Mouse info items</Link>
+              <Link to={`features/map-info-items`}>Map info items</Link>
               <div className="tooltip-content flex flex-col">
                 <span>Map with info-items relating to the current view.</span>
                 <span className="text-sm">
                   Displaying view center coordinates, zoomlevel, cursor
                   coordinates.
                 </span>
+              </div>
+            </li>
+
+            <li className="tooltip right">
+              <Link to={`features/map-features`}>Map features</Link>
+              <div className="tooltip-content flex flex-col">
+                {/* <span>Map with info-items relating to the current view.</span>
+                <span className="text-sm">
+                  Displaying view center coordinates, zoomlevel, cursor
+                  coordinates.
+                </span> */}
               </div>
             </li>
 

@@ -10,6 +10,11 @@ import { GisViewer } from "gis-viewer/src/gis-viewer";
 import { useElementSize } from "usehooks-ts";
 import { Vector2d } from "utils";
 import { OsmAttribution } from "gis-viewer/src/features/map-info/osm-attribution";
+import { ZoomLevelInfoItem } from "gis-viewer/src/features/map-info/zoom-level-info-item";
+import { CursorCoordinatesMapInfoItem } from "gis-viewer/src/features/map-info/cursor-coordinates-map-info-item";
+import { ViewCenterCoordinatesMapInfoItem } from "../../../gis-viewer/src/features/map-info/view-center-coordinates-map-info-item";
+import { LocationMarker } from "gis-viewer/src/features/map-features";
+import { FpsCounter } from "../../../gis-viewer/src/features/map-info/fps-counter";
 
 const MASTER_ID = "MASTER";
 const INITIAL_ZOOM_LEVEL = 5;
@@ -17,7 +22,7 @@ const INITIAL_CENTER_COORDINATE: Vector2d = [
   568228.114364449, 6816936.078896927,
 ];
 
-export function MouseInteractionsFeature() {
+export function MapFeaturesFeature() {
   const [wrapperRef, { width, height }] = useElementSize();
 
   return (
@@ -38,10 +43,32 @@ export function MouseInteractionsFeature() {
               <CrosshairSource />
             </Layer>
 
+            <Layer>
+              <LocationMarker
+                locations={[
+                  {
+                    coordinates: [545139, 6868755],
+                    content: "Amsterdam",
+                  },
+                  {
+                    coordinates: [680449, 6884170],
+                    content: "Harculo",
+                  },
+                ]}
+              />
+            </Layer>
+
             <InteractionContainer>
               <ZoomInteraction />
               <PanInteraction />
             </InteractionContainer>
+
+            <MapInfoContainer>
+              <ViewCenterCoordinatesMapInfoItem />
+              <ZoomLevelInfoItem />
+              <CursorCoordinatesMapInfoItem />
+              <FpsCounter />
+            </MapInfoContainer>
 
             <MapInfoContainer placement="bottom-right" direction="column">
               <OsmAttribution />

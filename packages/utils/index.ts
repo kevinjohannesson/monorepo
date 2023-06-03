@@ -38,3 +38,10 @@ export {
   multiplyVector2d,
   subtractVector2d,
 } from "./src/vector2d";
+
+export {
+  type WithVersion,
+  withVersioning,
+  withVersioningEnhancer,
+  selectVersion,
+} from "./src/use-reducer";

@@ -1,6 +1,6 @@
 import { isNull } from "utils";
 import { isTouchPadScroll } from "./utils";
-import { updateZoomLevel } from "../view/slice";
+import { updateZoomLevelPreservingPointPosition } from "../view/slice";
 import { useEffect, useRef } from "react";
 import { useGisViewerDispatch } from "../../slice";
 import { useViewContext } from "../view/context";
@@ -21,27 +21,68 @@ export function ZoomInteraction({
   const zoomDelta = useRef(0);
   const frameId = useRef<number | null>(null);
 
+  const zoomTicks = useRef<Array<{ timeStamp: number; direction: number; value: number }>>([]);
+
   useEffect(() => {
     const element = ref.current;
     if (isNull(element)) return;
 
     const handleWheel = (event: globalThis.WheelEvent): void => {
-      // event.preventDefault(); // Since the event is passive we have no need for this.
+      const now = event.timeStamp;
+      const direction = Math.sign(event.deltaY);
 
-      const delta = isTouchPadScroll(event) ? 0.1 : 0.1;
-      const directionalDelta = zoomDirection * delta;
+      if (isTouchPadScroll(event)) {
+        const delta = event.deltaY / 100;
 
-      zoomDelta.current += event.deltaY < 0 ? -directionalDelta : directionalDelta;
+        const directionalDelta = zoomDirection * delta;
+
+        zoomDelta.current += directionalDelta;
+      } else {
+        // If there's been a direction change or enough time has passed since the last event, reset the zoomTicks array
+        if (zoomTicks.current.length > 0) {
+          const lastEvent = zoomTicks.current[zoomTicks.current.length - 1];
+          if (lastEvent.direction !== direction || now - lastEvent.timeStamp > 200) {
+            zoomTicks.current = [];
+          }
+        }
+
+        // Append new zoom "tick". The value doubles if it's a subsequent event in the same direction.
+        zoomTicks.current.push({
+          timeStamp: now,
+          direction,
+          value:
+            zoomTicks.current.length > 0
+              ? zoomTicks.current[zoomTicks.current.length - 1].value * 2
+              : 0.01,
+        });
+
+        // Limit the array size
+        if (zoomTicks.current.length > 50) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const [_, ...rest] = zoomTicks.current;
+          zoomTicks.current = rest;
+        }
+
+        // The zoomSpeed is determined by the last "tick"
+        const zoomSpeed = zoomDirection * zoomTicks.current[zoomTicks.current.length - 1].value;
+
+        const directionalDelta = zoomDirection * -zoomSpeed;
+
+        zoomDelta.current += direction * directionalDelta;
+      }
 
       if (frameId.current === null) {
         frameId.current = requestAnimationFrame(() => {
-          dispatch(updateZoomLevel(zoomDelta.current));
+          dispatch(
+            updateZoomLevelPreservingPointPosition({
+              deltaZoom: zoomDelta.current,
+              pixelOriginForZoom: [event.offsetX, event.offsetY],
+            }),
+          );
           zoomDelta.current = 0;
           frameId.current = null;
         });
       }
-
-      event.stopPropagation();
     };
 
     element.addEventListener("wheel", handleWheel, { passive: true });
@@ -53,7 +94,7 @@ export function ZoomInteraction({
         frameId.current = null;
       }
     };
-  }, []);
+  }, [zoomDirection]);
 
   return null;
 }

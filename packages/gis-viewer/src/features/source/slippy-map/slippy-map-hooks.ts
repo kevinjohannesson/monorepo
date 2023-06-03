@@ -1,5 +1,5 @@
+import * as SlippyMapTileUtils from "./slippy-map-tile-utils";
 import * as SlippyMapUtils from "./slippy-map-utils";
-import * as SlippyTileUtils from "./slippy-tile-utils";
 import { type Vector2d } from "utils";
 import {
   useViewCenterCoordinate,
@@ -40,7 +40,7 @@ export function useCenterTilePosition(tileSize: number): Vector2d {
 
   const effectiveZoomLevel = useEffectiveZoomLevel(tileSize);
 
-  return SlippyTileUtils.calculatePositionFromProjectedSource(
+  return SlippyMapTileUtils.calculatePositionFromProjectedSource(
     centerCoordinates,
     viewProjection.code,
     effectiveZoomLevel,
@@ -68,5 +68,5 @@ export function useEffectiveTileSize(originalTileSize: number): number {
 }
 
 export function useCreateTileUrl(url: string): (x: number, y: number, z: number) => string {
-  return (x: number, y: number, z: number) => SlippyTileUtils.createTileUrl(url, x, y, z);
+  return (x: number, y: number, z: number) => SlippyMapTileUtils.createTileUrl(url, x, y, z);
 }

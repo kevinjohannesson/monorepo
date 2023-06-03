@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import { SimpleImageFetcher } from "./slippy-map-simple-fetcher";
-import { SlippyGrid } from "./slippy-grid";
-import { TileImageCacheProvider } from "../../cache/tile-image-cache";
+import { SlippyMapCacheProvider } from "./slippy-map-cache";
+import { SlippyMapGrid } from "./slippy-map-grid";
 
-interface ISlippyMapSourceProps {
+interface SlippyMapSourceProps {
   url?: string;
   tileSize?: number;
   lowestAvailableZoomLevel?: number;
@@ -17,16 +17,16 @@ export function SlippyMapSource({
   lowestAvailableZoomLevel,
   highestAvailableZoomLevel,
   displayTileNumbers,
-}: ISlippyMapSourceProps): ReactElement {
+}: SlippyMapSourceProps): ReactElement {
   return (
-    <TileImageCacheProvider>
+    <SlippyMapCacheProvider>
       <SimpleImageFetcher
         lowestAvailableZoomLevel={lowestAvailableZoomLevel}
         highestAvailableZoomLevel={highestAvailableZoomLevel}
         tileSize={tileSize}
         url={url}
       />
-      <SlippyGrid tileSize={tileSize} displayTileNumbers={displayTileNumbers} />
-    </TileImageCacheProvider>
+      <SlippyMapGrid tileSize={tileSize} displayTileNumbers={displayTileNumbers} />
+    </SlippyMapCacheProvider>
   );
 }

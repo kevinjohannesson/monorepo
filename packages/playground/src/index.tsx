@@ -1,19 +1,18 @@
-import { store } from "gis-viewer/src/gis-viewer";
+import { store } from "gis-viewer/src/store";
 import "gis-viewer/style/dist/index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ErrorView } from "./error-view";
-import { GisViewerGenericSlippyMapView } from "./experiments/gis-viewer-generic-slippy-map";
 import { MasterSlaveFeature } from "./features/master-slave";
 import { StaticSlippyMapFeature } from "./features/static-slippy-map";
-// import "./index.css";
 import { Root } from "./root";
 import "./style/index.scss";
 import { NavigationControlsFeature } from "./features/navigation-controls";
 import { MouseInteractionsFeature } from "./features/mouse-interactions";
 import { MapInfoItemsFeature } from "./features/map-info-items";
+import { MapFeaturesFeature } from "./features/map-features";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "features/map-info-items",
         element: <MapInfoItemsFeature />,
+      },
+      {
+        path: "features/map-features",
+        element: <MapFeaturesFeature />,
       },
       {
         path: "features/master-slave",
